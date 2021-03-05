@@ -1,6 +1,6 @@
 require "mazeGenerator"
 
-local TICK_RATE = 1 / 20
+local TICK_RATE = 1 / 200
 local MAX_FRAME_SKIP = 25
 
 function love.load()
