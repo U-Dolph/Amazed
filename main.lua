@@ -1,110 +1,95 @@
-require "mazeGenerator"
+Camera = require "lib/camera"
+maze = require "maze"
 
 mazeWidth = 20
 mazeHeight = 20
-drawScale = math.floor(math.min((love.graphics.getWidth() - 20) / (mazeWidth + 1), (love.graphics.getHeight() - 20) / (mazeHeight + 1)))
-Scale = 1
-OffsetX = 0
-OffsetY = 0
 
 function love.load()
-	stuff = createMaze(mazeWidth, mazeHeight)
 	love.graphics.setDefaultFilter("nearest", "nearest")
 
-	timer = 0
+	tilemap = love.graphics.newImage("gfx/Dungeon_Tileset.png")
 
-	img = love.graphics.newImage("gfx/0x72_DungeonTilesetII_v1.3.png")
+	floorImages = {
+		love.graphics.newQuad(96, 0, 16, 16, tilemap),
+		love.graphics.newQuad(112, 0, 16, 16, tilemap),
+		love.graphics.newQuad(128, 0, 16, 16, tilemap),
+		love.graphics.newQuad(144, 0, 16, 16, tilemap),
+		love.graphics.newQuad(96, 16, 16, 16, tilemap),
+		love.graphics.newQuad(112, 16, 16, 16, tilemap),
+		love.graphics.newQuad(128, 16, 16, 16, tilemap),
+		love.graphics.newQuad(144, 16, 16, 16, tilemap),
+		love.graphics.newQuad(96, 32, 16, 16, tilemap),
+		love.graphics.newQuad(112, 32, 16, 16, tilemap),
+		love.graphics.newQuad(128, 32, 16, 16, tilemap),
+		love.graphics.newQuad(144, 32, 16, 16, tilemap)
+	}
+	floorAtTopWallImages = {
+		love.graphics.newQuad(32, 16, 16, 16, tilemap),
+		love.graphics.newQuad(48, 16, 16, 16, tilemap)
+	}
+	floorAtTopLeftCornerImage = love.graphics.newQuad(16, 16, 16, 16, tilemap)
+	floorAtTopRightCornerImage = love.graphics.newQuad(64, 16, 16, 16, tilemap)
+	wallTopImages = {
+		love.graphics.newQuad(16, 0, 16, 16, tilemap),
+		love.graphics.newQuad(32, 0, 16, 16, tilemap),
+		love.graphics.newQuad(48, 0, 16, 16, tilemap)
+	}
 
-	floor = love.graphics.newQuad(16, 64, 16, 16, img:getDimensions())
+	wallBottomImages = {
+		love.graphics.newQuad(16, 64, 16, 16, tilemap),
+		love.graphics.newQuad(32, 64, 16, 16, tilemap)
+	}
 
-	wallLeft = love.graphics.newQuad(16, 128, 16, 16, img:getDimensions())
-	wallLeftCorner = love.graphics.newQuad(32, 128, 16, 16, img:getDimensions())
+	wallLeftImages = {
+		love.graphics.newQuad(0, 0, 16, 16, tilemap),
+		love.graphics.newQuad(0, 16, 16, 16, tilemap)
+	}
+	wallLeftInnerCornerImage = love.graphics.newQuad(0, 64, 16, 16, tilemap)
+	wallLefttOuterCornerImages = {
+		love.graphics.newQuad(48, 80, 16, 16, tilemap),
+		love.graphics.newQuad(80, 80, 16, 16, tilemap)
+	}
+	wallRightImages = {
+		love.graphics.newQuad(80, 0, 16, 16, tilemap),
+		love.graphics.newQuad(80, 16, 16, 16, tilemap)
+	}
+	wallRightInnerCornerImage = love.graphics.newQuad(80, 64, 16, 16, tilemap)
+	wallRightOuterCornerImages = {
+		love.graphics.newQuad(0, 80, 16, 16, tilemap),
+		love.graphics.newQuad(64, 80, 16, 16, tilemap)
+	}
 
-	wallRight = love.graphics.newQuad(0, 128, 16, 16, img:getDimensions())
-	wallRightCorner = love.graphics.newQuad(48, 128, 16, 16, img:getDimensions())
+	Maze = maze:new(mazeWidth, mazeHeight)
+	Maze:createMaze(16 * 16, 16 * 16)
 
-	wallTop = love.graphics.newQuad(16, 16, 16, 16, img:getDimensions())
-
-	tilemap = {}
-
-	for y = 0, mazeHeight - 1 do
-		for x = 0, mazeWidth - 1 do
-			local room = {tiles = {}, x = x * 16 * 16, y = y * 16 * 16}
-			table.insert(tilemap, room)
-		end
-	end
-
-	for i, j in ipairs(tilemap) do
-		if not stuff.rooms[i].previsited then
-			for k = 0, 15 do
-				for l = 0, 15 do
-					table.insert(j.tiles, {floorImage = floor, wallImage = nil, x = j.x + l * 16, y = j.y + k * 16})
-				end
-			end
-		end
-
-		for k, l in ipairs(j.tiles) do
-			if stuff.rooms[i].path[1] == 0 and l.y == j.y then
-				l.wallImage = wallTop
-			end
-
-			if stuff.rooms[i].path[4] == 0 and l.x == j.x then
-				l.wallImage = wallLeft
-
-				if stuff.rooms[i].path[1] == 0 and j.x == l.x and j.y == l.y then
-					l.wallImage = wallLeftCorner
-				end
-			end
-
-			if stuff.rooms[i].path[2] == 0 and l.x == j.x + 16 * 15 then
-				l.wallImage = wallRight
-
-				if stuff.rooms[i].path[1] == 0 and l.x == j.x + 16 * 15 and l.y == j.y then
-					l.wallImage = wallRightCorner
-				end
-			end
-		end
-	end
+	camera = Camera(0, 0, 640, 360)
 end
 
 function love.update(dt)
-
+	camera:update(dt)
 end
 
 function love.draw()
-	love.graphics.scale(drawScale)
-	love.graphics.translate(1, 1)
-
-	stuff.render(stuff, drawScale)
-	love.graphics.reset()
-
-	love.graphics.scale(Scale)
-	love.graphics.translate(OffsetX, OffsetY)
-	--[[for i, j in ipairs(tilemap) do
-		for k, l in ipairs(j.tiles) do
-			love.graphics.draw(img, l.floorImage, l.x, l.y)
-			if l.wallImage then
-				love.graphics.draw(img, l.wallImage, l.x, l.y)
-			end
-		end
-	end]]
-
-	love.graphics.reset()
+	camera:attach()
+		Maze:render()
+	camera:detach()
 end
 
 function love.resize()
-	drawScale = math.floor(math.min((love.graphics.getWidth()) / (mazeWidth + 1), (love.graphics.getHeight()) / (mazeHeight + 1)))
+	camera.scale = math.max(love.graphics.getHeight() / 360, love.graphics.getWidth() / 640)
 end
 
-function love.wheelmoved(x, y)
-	Scale = math.max(Scale + y / 20, 0.05)
+function love.wheelmoved(_, y)
+
 end
 
 function love.mousemoved(x, y, dx, dy)
 	if love.mouse.isDown(1) then
-		OffsetX = OffsetX + dx / Scale
-		OffsetY = OffsetY + dy / Scale
+		camera.x = camera.x - dx / camera.scale
+		camera.y = camera.y - dy / camera.scale
 	end
+
+	--print(camera.x, camera.y)
 end
 
 function love.keypressed(key)
@@ -121,6 +106,6 @@ function love.keypressed(key)
 	end
 
 	if key == "space" then
-		stuff = createMaze(mazeWidth, mazeHeight)
+		Maze:createMaze(16 * 16, 16 * 16)
 	end
 end
