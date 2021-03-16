@@ -59,14 +59,14 @@ function maze:new(_w, _h)
 		return self.rooms[self:getIndex(xMod, yMod, _element)].node
 	end
 
-	function self:initMaze(_roomWidth, _roomHeight)
+	function self:initMaze(_tileSize, _roomSize)
 		self.noiseOffsetX, self.noiseOffsetY = love.math.random(-5000, 5000), love.math.random(-5000, 5000)
 
 		self.rooms = {}
 
 		for y = 0, self.height - 1 do
 			for x = 0, self.width - 1 do
-				table.insert(self.rooms, room:new(x, y, _roomWidth, _roomHeight))
+				table.insert(self.rooms, room:new(x, y, _tileSize, _roomSize))
 			end
 		end
 
@@ -78,8 +78,8 @@ function maze:new(_w, _h)
 		self.rooms[startFrom].visited = true
 	end
 
-	function self:createMaze(_roomWidth, _roomHeight)
-		self:initMaze(_roomWidth, _roomHeight)
+	function self:createMaze(_tileSize, _roomSize)
+		self:initMaze(_tileSize, _roomSize)
 		local visitedCells = 0
 
 		--Carving maze
@@ -152,7 +152,7 @@ function maze:new(_w, _h)
 			if j.visited then visitedCells = visitedCells + 1 end
 		end
 
-		for _, j in ipairs(self.rooms) do if j.visited then j:createTilemap() end end
+		for _, j in ipairs(self.rooms) do if j.visited then j:createTilemap() j:createColliders() end end
 
 		--Check if generation failed
 		if visitedCells < _w * _h / 2 then self:createMaze(_w, _h) end
@@ -254,8 +254,8 @@ function maze:new(_w, _h)
 	end
 
 	function self:render()
-		for i, j in ipairs(self.rooms) do
-            if j.visited then
+		for _, j in ipairs(self.rooms) do
+            --[[if j.visited then
                 if j.node == self.startNode then
                     love.graphics.setColor(0, 1, 0, 1)
                     love.graphics.circle("fill", j.node.renderX, j.node.renderY, j.node.renderRadius, 100)
@@ -264,20 +264,12 @@ function maze:new(_w, _h)
                     love.graphics.setColor(1, 0, 0, 1)
                     love.graphics.circle("fill", j.node.renderX, j.node.renderY, j.node.renderRadius, 100)
                 end
-            end
-
-			--local Scale = camera.scale
-			--local OffsetX, OffsetY = -(camera.x * Scale - 300 * Scale), -(camera.y * Scale - 160 * Scale)
-
-            --[[if (j.renderX * Scale) + (OffsetX * Scale) + (j.w * Scale) > 0 and (j.renderX * Scale) + (OffsetX * Scale) < love.graphics.getWidth() and
-			(j.renderY * Scale) + (OffsetY * Scale) + (j.h * Scale) > 0 and (j.renderY * Scale) + (OffsetY * Scale) < love.graphics.getHeight() then
-				j:render()
-			end]]
+            end]]
 
 			local xLeft, yTop = camera:toCameraCoords(j.renderX, j.renderY)
 			local xRight, yBottom = camera:toCameraCoords(j.renderX + j.w, j.renderY + j.h)
 
-			if xRight >= 0 and xLeft <= love.graphics.getWidth() and yBottom >= 0 and yTop <= love.graphics.getHeight() then
+			if j:setRoomActive(xRight >= 0 and xLeft <= love.graphics.getWidth() and yBottom >= 0 and yTop <= love.graphics.getHeight()) then
 				j:render()
 			end
         end

@@ -1,8 +1,8 @@
 function love.conf(t)
 	t.window.title = 'Template'
 
-	t.window.width = 640
-	t.window.height = 360
+	t.window.width = 1280
+	t.window.height = 720
 
 	t.window.borderless = false
 	t.window.fullscreen = false
