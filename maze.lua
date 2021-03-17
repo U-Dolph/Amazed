@@ -152,7 +152,7 @@ function maze:new(_w, _h)
 			if j.visited then visitedCells = visitedCells + 1 end
 		end
 
-		for _, j in ipairs(self.rooms) do if j.visited then j:createTilemap() j:createColliders() end end
+		for _, j in ipairs(self.rooms) do if j.visited then j:createTilemap() j:createColliders() j:createShadowboxes() end end
 
 		--Check if generation failed
 		if visitedCells < _w * _h / 2 then self:createMaze(_w, _h) end
@@ -266,8 +266,8 @@ function maze:new(_w, _h)
                 end
             end]]
 
-			local xLeft, yTop = camera:toCameraCoords(j.renderX, j.renderY)
-			local xRight, yBottom = camera:toCameraCoords(j.renderX + j.w, j.renderY + j.h)
+			local xLeft, yTop = cam:toScreen(j.renderX, j.renderY)
+			local xRight, yBottom = cam:toScreen(j.renderX + j.w, j.renderY + j.h)
 
 			if j:setRoomActive(xRight >= 0 and xLeft <= love.graphics.getWidth() and yBottom >= 0 and yTop <= love.graphics.getHeight()) then
 				j:render()

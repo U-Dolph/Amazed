@@ -41,9 +41,9 @@ function room:new(_x, _y, _tileSize, _roomSize)
 				end
 			end
 
-			love.graphics.setColor(1, 1, 1, 0.2)
-			--love.graphics.rectangle("line", self.renderX, self.renderY, self.w, self.h)
-			love.graphics.setColor(1,1,1,1)
+			--[[love.graphics.setColor(1, 1, 1, 0.2)
+			love.graphics.rectangle("line", self.renderX, self.renderY, self.w, self.h)
+			love.graphics.setColor(1,1,1,1)]]
 
 			--if self.path[1] == 0 and not self.previsited then love.graphics.line(self.renderX, self.renderY, self.renderX + self.w, self.renderY) end
 			--if self.path[2] == 0 and not self.previsited then love.graphics.line(self.renderX + self.w, self.renderY, self.renderX + self.w, self.renderY + self.h) end
@@ -183,7 +183,6 @@ function room:new(_x, _y, _tileSize, _roomSize)
 
 	function self:createColliders()
 		if self.path[1] == 0 then
-			--table.insert(self.colliders, world:newLineCollider(self.renderX, self.renderY + 16, self.renderX + self.w, self.renderY + 16))
 			table.insert(self.colliders, world:newChainCollider(false, {
 				self.renderX, self.renderY,
 				self.renderX, self.renderY + self.tileSize,
@@ -195,7 +194,6 @@ function room:new(_x, _y, _tileSize, _roomSize)
 		end
 
 		if self.path[3] == 0 then
-			--table.insert(self.colliders, world:newLineCollider(self.renderX, self.renderY + self.h - 16, self.renderX + self.w, self.renderY + self.h - 16))
 			table.insert(self.colliders, world:newChainCollider(false, {
 				self.renderX, self.renderY + self.h,
 				self.renderX, self.renderY + self.h - self.tileSize,
@@ -281,8 +279,107 @@ function room:new(_x, _y, _tileSize, _roomSize)
 		end
 	end
 
+	function self:createShadowboxes()
+		local neighbours = {
+			Maze.rooms[Maze:getIndex(1, -1, self)], --NE-neighbour
+			Maze.rooms[Maze:getIndex(1, 1, self)], --SE-neighbour
+			Maze.rooms[Maze:getIndex(-1, 1, self)], --SW-neighbour
+			Maze.rooms[Maze:getIndex(-1, -1, self)], --NW-neighbour
+		}
+
+		--local widthModifier = {0, 0}
+		--[[if self.path[1] == 0 then
+			if neighbours[1] and neighbours[1].path[3] == 1 and neighbours[1].path[4] == 1 and self.path[2] == 1 then
+				widthModifier[2] = -7
+			end
+
+			if neighbours[4] and neighbours[4].path[3] == 1 and neighbours[4].path[2] == 1 and self.path[4] == 1 then
+				widthModifier[1] = 7
+			end
+
+			lighter:addPolygon({
+				self.renderX + widthModifier[1], self.renderY,
+				self.renderX + self.w + widthModifier[2], self.renderY
+			})
+		end]]
+
+		local widthModifier = {0, 0}
+		if self.path[3] == 0 then
+			if neighbours[2] and neighbours[2].path[1] == 1 and neighbours[2].path[4] == 1 and self.path[2] == 1 then
+				widthModifier[2] = -7
+			end
+
+			if neighbours[3] and neighbours[3].path[1] == 1 and neighbours[3].path[2] == 1 and self.path[4] == 1 then
+				widthModifier[1] = 7
+			end
+
+			lighter:addPolygon({
+				self.renderX + widthModifier[1], self.renderY + self.h - 8,
+				self.renderX + self.w + widthModifier[2], self.renderY + self.h - 8,
+				self.renderX + self.w + widthModifier[2], self.renderY + self.h,
+				self.renderX + widthModifier[1], self.renderY + self.h
+			})
+		end
+
+		--*Order: Top, Bottom
+		local heightModifier = {0, 0}
+		if self.path[2] == 0 then
+			if neighbours[1] and neighbours[1].path[4] == 1 and neighbours[1].path[3] == 1 and self.path[1] == 1 then
+				heightModifier[1] = 8
+			end
+
+			if neighbours[2] and neighbours[2].path[4] == 1 and neighbours[2].path[1] == 1 and self.path[3] == 1 then
+				heightModifier[2] = -16
+			end
+
+			lighter:addPolygon({
+				self.renderX + self.w - self.tileSize + 7, self.renderY + heightModifier[1],
+				self.renderX + self.w, self.renderY + heightModifier[1],
+				self.renderX + self.w, self.renderY + self.h + heightModifier[2],
+				self.renderX + self.w - self.tileSize + 7, self.renderY + self.h + heightModifier[2],
+			})
+		end
+
+		heightModifier = {0, 0}
+		if self.path[4] == 0 then
+			if neighbours[4] and neighbours[4].path[2] == 1 and neighbours[4].path[3] == 1 and self.path[1] == 1 then
+				heightModifier[1] = 8
+			end
+
+			if neighbours[3] and neighbours[3].path[2] == 1 and neighbours[3].path[1] == 1 and self.path[3] == 1 then
+				heightModifier[2] = -16
+			end
+
+			lighter:addPolygon({
+				self.renderX, self.renderY + heightModifier[1],
+				self.renderX + 9, self.renderY + heightModifier[1],
+				self.renderX + 9, self.renderY + self.h + heightModifier[2],
+				self.renderX, self.renderY + self.h + heightModifier[2],
+			})
+		end
+
+		--*PLACE MISSING CORNERS
+		if self.path[2] == 1 and self.path[3] == 1 and neighbours[2] and neighbours[2].path[1] == 0 and neighbours[2].path[4] == 0 then
+			lighter:addPolygon({
+				self.renderX + self.w - 9, self.renderY + self.h - 8,
+				self.renderX + self.w, self.renderY + self.h - 8,
+				self.renderX + self.w, self.renderY + self.h,
+				self.renderX + self.w - 9, self.renderY + self.h
+			})
+		end
+
+		if self.path[4] == 1 and self.path[3] == 1 and neighbours[3] and neighbours[3].path[1] == 0 and neighbours[3].path[2] == 0 then
+			lighter:addPolygon({
+				self.renderX, self.renderY + self.h - 8,
+				self.renderX + 9, self.renderY + self.h - 8,
+				self.renderX + 9, self.renderY + self.h,
+				self.renderX, self.renderY + self.h
+			})
+		end
+	end
+
 	function self:setRoomActive(_isActive)
-		for i, j in ipairs(self.colliders) do
+		for _, j in ipairs(self.colliders) do
 			j:setAwake(_isActive)
 		end
 

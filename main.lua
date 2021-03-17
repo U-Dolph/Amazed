@@ -1,6 +1,7 @@
+Lighter = require 'lib/lighter'
 windfield = require "lib/windfield"
 anim8 = require "lib/anim8"
-Camera = require "lib/camera"
+gamera = require 'lib/gamera'
 
 player = require "player"
 maze = require "maze"
@@ -68,44 +69,55 @@ function love.load()
 
 	world = windfield.newWorld(0, 0, true)
 	world:addCollisionClass('Wall', {ignores = {'Wall'}})
-	world:setSleepingAllowed( true )
+	world:setSleepingAllowed(true)
+
+	lighter = Lighter()
+
+	cam = gamera.new(-320, -180, mazeWidth * 16 * 8 + 640, mazeHeight * 16 * 8 + 360)
+	cam:setWindow(0, 0, 640, 360)
 
 	Maze = maze:new(mazeWidth, mazeHeight)
 	Maze:createMaze(16, 8)
 
 	Player = player:new(Maze.startNode.renderX, Maze.startNode.renderY)
 
-	camera = Camera(Player.x, Player.y, 640, 360)
-	camera:setFollowLerp(0.2)
-	--camera:setFollowLead(6)
-	--camera:setFollowStyle('TOPDOWN_TIGHT')
-
 	canvas = love.graphics.newCanvas(640, 360)
 
-	doDrawColliders = true
+	
+
+	doDrawColliders = false
+
+	lightCanvas = love.graphics.newCanvas(640, 360)
 end
 
 function love.update(dt)
 	world:update(dt)
 	Player:update(dt)
-	camera:update(dt)
-	camera:follow(Player.x, Player.y)
+	cam:setPosition(Player.x, Player.y)
+	lighter:updateLight(Player.light, Player.x, Player.y)
+
+	preDrawLights()
 end
 
 function love.draw()
-	love.graphics.setCanvas(canvas)
+	love.graphics.setCanvas({canvas, stencil = true})
 		love.graphics.clear()
-
-		camera:attach()
+		cam:draw(function(l,t,w,h)
 			Maze:render()
 			Player:render()
 			if doDrawColliders then world:draw() end
-		camera:detach()
+		end)
+		love.graphics.setBlendMode("multiply", "premultiplied")
+		love.graphics.draw(lightCanvas)
+		love.graphics.setBlendMode("alpha")
 	love.graphics.reset()
 
 	love.graphics.draw(canvas, math.floor(love.graphics.getWidth()/2), math.floor(love.graphics.getHeight()/2), 0, renderScale, renderScale, math.floor(canvas:getWidth()/2), math.floor(canvas:getHeight()/2))
-
+	
+	
+	
 	love.graphics.print(love.timer.getFPS(), 10, 10)
+
 end
 
 function love.resize()
@@ -119,13 +131,6 @@ function love.wheelmoved(_, y)
 end
 
 function love.mousemoved(x, y, dx, dy)
-	--[[
-		if love.mouse.isDown(1) then
-		camera.x = camera.x - dx / camera.scale
-		camera.y = camera.y - dy / camera.scale
-	end]]
-
-	--print(camera.x, camera.y)
 end
 
 function love.keypressed(key)
@@ -151,104 +156,17 @@ function love.keypressed(key)
 	end
 
 	if key == "space" then
-		Maze:createMaze(16, 12)
+		Maze:createMaze(16, 8)
 	end
 end
 
---[[ 
- *fixed timestep
-function love.run()
-    if love.math then love.math.setRandomSeed(os.time()) end
-    if love.load then love.load(arg) end
-    if love.timer then love.timer.step() end
-
-    local dt = 0
-    local fixed_dt = 1/144
-    local accumulator = 0
-
-    while true do
-        if love.event then
-            love.event.pump()
-            for name, a, b, c, d, e, f in love.event.poll() do
-                if name == 'quit' then
-                    if not love.quit or not love.quit() then
-                        return a
-                    end
-                end
-                love.handlers[name](a, b, c, d, e, f)
-            end
-        end
-
-        if love.timer then
-            love.timer.step()
-            dt = love.timer.getDelta()
-        end
-
-        accumulator = accumulator + dt
-        while accumulator >= fixed_dt do
-            if love.update then love.update(fixed_dt) end
-            accumulator = accumulator - fixed_dt
-        end
-
-        if love.graphics and love.graphics.isActive() then
-            love.graphics.clear(love.graphics.getBackgroundColor())
-            love.graphics.origin()
-            if love.draw then love.draw() end
-            love.graphics.present()
-        end
-
-        if love.timer then love.timer.sleep(0.0001) end
-    end
-end]]
-
--- 1 / Ticks Per Second
-local TICK_RATE = 1 / 144
-
--- How many Frames are allowed to be skipped at once due to lag (no "spiral of death")
-local MAX_FRAME_SKIP = 10
-
--- No configurable framerate cap currently, either max frames CPU can handle (up to 1000), or vsync'd if conf.lua
-
-function love.run()
-    if love.load then love.load(love.arg.parseGameArguments(arg), arg) end
- 
-    -- We don't want the first frame's dt to include time taken by love.load.
-    if love.timer then love.timer.step() end
-
-    local lag = 0.0
-
-    -- Main loop time.
-    return function()
-        -- Process events.
-        if love.event then
-            love.event.pump()
-            for name, a,b,c,d,e,f in love.event.poll() do
-                if name == "quit" then
-                    if not love.quit or not love.quit() then
-                        return a or 0
-                    end
-                end
-                love.handlers[name](a,b,c,d,e,f)
-            end
-        end
-
-        -- Cap number of Frames that can be skipped so lag doesn't accumulate
-        if love.timer then lag = math.min(lag + love.timer.step(), TICK_RATE * MAX_FRAME_SKIP) end
-
-        while lag >= TICK_RATE do
-            if love.update then love.update(TICK_RATE) end
-            lag = lag - TICK_RATE
-        end
-
-        if love.graphics and love.graphics.isActive() then
-            love.graphics.origin()
-            love.graphics.clear(love.graphics.getBackgroundColor())
- 
-            if love.draw then love.draw() end
-            love.graphics.present()
-        end
-
-        -- Even though we limit tick rate and not frame rate, we might want to cap framerate at 1000 frame rate as mentioned https://love2d.org/forums/viewtopic.php?f=4&t=76998&p=198629&hilit=love.timer.sleep#p160881
-        if love.timer then love.timer.sleep(0.001) end
-    end
+function preDrawLights()
+	love.graphics.setCanvas({ lightCanvas, stencil = true})
+	love.graphics.clear(0.0, 0.0, 0.0) -- Global illumination level
+	local tX, tY = cam:getPosition()
+	tX = tX - 320
+	tY = tY - 180
+	love.graphics.translate(-tX, -tY)
+	lighter:drawLights()
+	love.graphics.setCanvas()
 end

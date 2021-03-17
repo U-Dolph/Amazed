@@ -18,6 +18,8 @@ function player:new(_x, _y)
 	self.footCollider:setFixedRotation(true)
 	self.footCollider:setMass(self.footCollider:getMass() / 3)
 
+	self.light = lighter:addLight(self.x, self.y, 360, 1, 1, 1)
+
 	function self:update(dt)
 		self.isIdle = true
 
