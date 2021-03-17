@@ -22,6 +22,8 @@ function room:new(_x, _y, _tileSize, _roomSize)
 	self.tilemap = {}
 	self.colliders = {}
 
+	self.explored = false
+
 	function self:render()
 		if self.visited then
 			love.graphics.setColor(1, 1, 1, 1)

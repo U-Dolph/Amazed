@@ -3,11 +3,13 @@ local node = require "node"
 
 local maze = {}
 
-function maze:new(_w, _h)
+function maze:new(_w, _h, _tileSize, _roomSize)
 	local self = {}
 
 	self.width = _w
 	self.height = _h
+	self.tileSize = _tileSize
+	self.roomSize = _roomSize
 
 	self.stack = {}
 	self.rooms = {}
@@ -59,14 +61,14 @@ function maze:new(_w, _h)
 		return self.rooms[self:getIndex(xMod, yMod, _element)].node
 	end
 
-	function self:initMaze(_tileSize, _roomSize)
+	function self:initMaze()
 		self.noiseOffsetX, self.noiseOffsetY = love.math.random(-5000, 5000), love.math.random(-5000, 5000)
 
 		self.rooms = {}
 
 		for y = 0, self.height - 1 do
 			for x = 0, self.width - 1 do
-				table.insert(self.rooms, room:new(x, y, _tileSize, _roomSize))
+				table.insert(self.rooms, room:new(x, y, self.tileSize, self.roomSize))
 			end
 		end
 
@@ -78,7 +80,7 @@ function maze:new(_w, _h)
 		self.rooms[startFrom].visited = true
 	end
 
-	function self:createMaze(_tileSize, _roomSize)
+	function self:createMaze()
 		self:initMaze(_tileSize, _roomSize)
 		local visitedCells = 0
 
@@ -282,6 +284,23 @@ function maze:new(_w, _h)
             love.graphics.line(tempNode.renderX, tempNode.renderY, tempNode.parent.renderX, tempNode.parent.renderY)
             tempNode = tempNode.parent
         end]]
+	end
+
+	function self:update(dt)
+		for _, j in ipairs(self.rooms) do
+			local xLeft, yTop = cam:toScreen(j.renderX, j.renderY)
+			local xRight, yBottom = cam:toScreen(j.renderX + j.w, j.renderY + j.h)
+
+			if xRight >= 0 and xLeft <= love.graphics.getWidth() and yBottom >= 0 and yTop <= love.graphics.getHeight() then
+				if Player.x >= j.renderX and Player.x <= j.renderX + j.w and Player.y >= j.renderY and Player.y <= j.renderY + j.h then
+					if j.path[1] == 1 then self.rooms[self:getIndex(0, -1, j)].explored = true end
+					if j.path[2] == 1 then self.rooms[self:getIndex(1, 0, j)].explored = true end
+					if j.path[3] == 1 then self.rooms[self:getIndex(0, 1, j)].explored = true end
+					if j.path[4] == 1 then self.rooms[self:getIndex(-1, 0, j)].explored = true end
+					j.explored = true
+				end
+			end
+		end
 	end
 
 	return self

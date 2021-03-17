@@ -1,10 +1,11 @@
-Lighter = require 'lib/lighter'
-windfield = require "lib/windfield"
-anim8 = require "lib/anim8"
-gamera = require 'lib/gamera'
+Lighter 	= require 'lib/lighter'
+windfield 	= require "lib/windfield"
+anim8 		= require "lib/anim8"
+gamera 		= require 'lib/gamera'
 
-player = require "player"
-maze = require "maze"
+player 	= require "player"
+maze 	= require "maze"
+minimap = require "minimap"
 
 mazeWidth = 20
 mazeHeight = 20
@@ -13,6 +14,9 @@ renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight()
 
 function love.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
+
+	cursor = love.mouse.newCursor( "gfx/cursor.png", 11, 11)
+	love.mouse.setCursor(cursor)
 
 	tilemap = love.graphics.newImage("gfx/Dungeon_Tileset.png")
 	animationImage = love.graphics.newImage("gfx/0x72_DungeonTilesetII_v1.3.png")
@@ -76,25 +80,24 @@ function love.load()
 	cam = gamera.new(-320, -180, mazeWidth * 16 * 8 + 640, mazeHeight * 16 * 8 + 360)
 	cam:setWindow(0, 0, 640, 360)
 
-	Maze = maze:new(mazeWidth, mazeHeight)
-	Maze:createMaze(16, 8)
+	Maze = maze:new(mazeWidth, mazeHeight, 16, 8)
+	Maze:createMaze()
 
 	Player = player:new(Maze.startNode.renderX, Maze.startNode.renderY)
 
 	canvas = love.graphics.newCanvas(640, 360)
-
-	
+	lightCanvas = love.graphics.newCanvas(640, 360)
 
 	doDrawColliders = false
 
-	lightCanvas = love.graphics.newCanvas(640, 360)
+	Minimap = minimap:new(640 - 112 - 10, 10, 100, 100, mazeWidth, mazeHeight)
 end
 
 function love.update(dt)
 	world:update(dt)
+	Maze:update(dt)
 	Player:update(dt)
 	cam:setPosition(Player.x, Player.y)
-	lighter:updateLight(Player.light, Player.x, Player.y)
 
 	preDrawLights()
 end
@@ -102,22 +105,23 @@ end
 function love.draw()
 	love.graphics.setCanvas({canvas, stencil = true})
 		love.graphics.clear()
+
 		cam:draw(function(l,t,w,h)
 			Maze:render()
 			Player:render()
 			if doDrawColliders then world:draw() end
 		end)
+
 		love.graphics.setBlendMode("multiply", "premultiplied")
 		love.graphics.draw(lightCanvas)
 		love.graphics.setBlendMode("alpha")
+		Minimap:render()
 	love.graphics.reset()
-
+	
+	
 	love.graphics.draw(canvas, math.floor(love.graphics.getWidth()/2), math.floor(love.graphics.getHeight()/2), 0, renderScale, renderScale, math.floor(canvas:getWidth()/2), math.floor(canvas:getHeight()/2))
-	
-	
-	
-	love.graphics.print(love.timer.getFPS(), 10, 10)
 
+	love.graphics.print(love.timer.getFPS(), 10, 10)
 end
 
 function love.resize()
@@ -134,6 +138,8 @@ function love.mousemoved(x, y, dx, dy)
 end
 
 function love.keypressed(key)
+	Player:getKeypress(key)
+
 	if key == "escape" then
 		love.event.quit()
 	end
@@ -154,10 +160,6 @@ function love.keypressed(key)
 	if key == "f2" then
 		doDrawColliders = not doDrawColliders
 	end
-
-	if key == "space" then
-		Maze:createMaze(16, 8)
-	end
 end
 
 function preDrawLights()
@@ -169,4 +171,5 @@ function preDrawLights()
 	love.graphics.translate(-tX, -tY)
 	lighter:drawLights()
 	love.graphics.setCanvas()
+	love.graphics.reset()
 end
