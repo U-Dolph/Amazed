@@ -104,11 +104,12 @@ function love.update(dt)
 end
 
 function love.draw()
+	local roomsRendered = 0
 	love.graphics.setCanvas({canvas, stencil = true})
 		love.graphics.clear()
 
 		cam:draw(function(l,t,w,h)
-			Maze:render()
+			roomsRendered = Maze:render()
 			Player:render()
 			if doDrawColliders then world:draw() end
 		end)
@@ -123,6 +124,7 @@ function love.draw()
 
 	love.graphics.print("FPS:" .. love.timer.getFPS(), 10, 10)
 	love.graphics.print("Body Count: " .. world:getBodyCount( ), 10, 30)
+	love.graphics.print("Rooms rendered: " .. roomsRendered, 10, 50)
 end
 
 function love.resize()

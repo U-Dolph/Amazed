@@ -262,6 +262,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 	end
 
 	function self:render()
+		local numOfRooms = 0
 		for _, j in ipairs(self.rooms) do
             --[[if j.visited then
                 if j.node == self.startNode then
@@ -277,10 +278,17 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 			local xLeft, yTop = cam:toScreen(j.renderX, j.renderY)
 			local xRight, yBottom = cam:toScreen(j.renderX + j.w, j.renderY + j.h)
 
-			if xRight >= 0 and xLeft <= love.graphics.getWidth() and yBottom >= 0 and yTop <= love.graphics.getHeight() then
+			if xRight > 0 and xLeft < 640 and yBottom > 0 and yTop < 360 then
 				j:render()
+				numOfRooms = numOfRooms + 1
+			end
+
+			if j.renderX + j.w >= Player.x and j.renderX <= Player.x and j.renderY + j.h >= Player.y and j.renderY <= Player.y then
+				--j:render()
 			end
         end
+
+		return numOfRooms
 
 		--[[love.graphics.setColor(1, 0, 0)
 
@@ -305,7 +313,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 				j.explored = true
 			end
 
-			if xRight >= 0 and xLeft <= love.graphics.getWidth() and yBottom >= 0 and yTop <= love.graphics.getHeight() then
+			if xRight > 0 and xLeft < 640 and yBottom > 0 and yTop < 360 then
 				if #j.colliders == 0 and j.visited then
 					j:createColliders()
 				end
