@@ -154,14 +154,20 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 			if j.visited then visitedCells = visitedCells + 1 end
 		end
 
-		for _, j in ipairs(self.rooms) do if j.visited then j:createTilemap() j:createColliders() j:createShadowboxes() end end
-
 		--Check if generation failed
 		if visitedCells < _w * _h / 2 then self:createMaze(_w, _h) end
 
 		self:manageNodes()
 		self:solvePath()
-		print(self:getDistance())
+
+
+		for _, j in ipairs(self.rooms) do
+			if j.visited then
+				j:createTilemap()
+				--j:createColliders()
+				j:createShadowboxes()
+			end
+		end
 	end
 
 	function self:manageNodes()
@@ -271,7 +277,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 			local xLeft, yTop = cam:toScreen(j.renderX, j.renderY)
 			local xRight, yBottom = cam:toScreen(j.renderX + j.w, j.renderY + j.h)
 
-			if j:setRoomActive(xRight >= 0 and xLeft <= love.graphics.getWidth() and yBottom >= 0 and yTop <= love.graphics.getHeight()) then
+			if xRight >= 0 and xLeft <= love.graphics.getWidth() and yBottom >= 0 and yTop <= love.graphics.getHeight() then
 				j:render()
 			end
         end
@@ -291,13 +297,22 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 			local xLeft, yTop = cam:toScreen(j.renderX, j.renderY)
 			local xRight, yBottom = cam:toScreen(j.renderX + j.w, j.renderY + j.h)
 
+			if Player.x >= j.renderX and Player.x <= j.renderX + j.w and Player.y >= j.renderY and Player.y <= j.renderY + j.h then
+				if j.path[1] == 1 then self.rooms[self:getIndex(0, -1, j)].explored = true end
+				if j.path[2] == 1 then self.rooms[self:getIndex(1, 0, j)].explored = true end
+				if j.path[3] == 1 then self.rooms[self:getIndex(0, 1, j)].explored = true end
+				if j.path[4] == 1 then self.rooms[self:getIndex(-1, 0, j)].explored = true end
+				j.explored = true
+			end
+
 			if xRight >= 0 and xLeft <= love.graphics.getWidth() and yBottom >= 0 and yTop <= love.graphics.getHeight() then
-				if Player.x >= j.renderX and Player.x <= j.renderX + j.w and Player.y >= j.renderY and Player.y <= j.renderY + j.h then
-					if j.path[1] == 1 then self.rooms[self:getIndex(0, -1, j)].explored = true end
-					if j.path[2] == 1 then self.rooms[self:getIndex(1, 0, j)].explored = true end
-					if j.path[3] == 1 then self.rooms[self:getIndex(0, 1, j)].explored = true end
-					if j.path[4] == 1 then self.rooms[self:getIndex(-1, 0, j)].explored = true end
-					j.explored = true
+				if #j.colliders == 0 and j.visited then
+					j:createColliders()
+				end
+			else
+				for k, l in ipairs(j.colliders) do
+					l:destroy()
+					table.remove(j.colliders, k)
 				end
 			end
 		end

@@ -1,3 +1,4 @@
+Timer 		= require "lib/timer"
 Lighter 	= require 'lib/lighter'
 windfield 	= require "lib/windfield"
 anim8 		= require "lib/anim8"
@@ -7,8 +8,8 @@ player 	= require "player"
 maze 	= require "maze"
 minimap = require "minimap"
 
-mazeWidth = 20
-mazeHeight = 20
+mazeWidth = 30
+mazeHeight = 30
 
 renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
 
@@ -85,12 +86,12 @@ function love.load()
 
 	Player = player:new(Maze.startNode.renderX, Maze.startNode.renderY)
 
+	Minimap = minimap:new(518, 10, 100, 100)
+
 	canvas = love.graphics.newCanvas(640, 360)
 	lightCanvas = love.graphics.newCanvas(640, 360)
 
 	doDrawColliders = false
-
-	Minimap = minimap:new(640 - 112 - 10, 10, 100, 100, mazeWidth, mazeHeight)
 end
 
 function love.update(dt)
@@ -117,17 +118,15 @@ function love.draw()
 		love.graphics.setBlendMode("alpha")
 		Minimap:render()
 	love.graphics.reset()
-	
-	
+
 	love.graphics.draw(canvas, math.floor(love.graphics.getWidth()/2), math.floor(love.graphics.getHeight()/2), 0, renderScale, renderScale, math.floor(canvas:getWidth()/2), math.floor(canvas:getHeight()/2))
 
-	love.graphics.print(love.timer.getFPS(), 10, 10)
+	love.graphics.print("FPS:" .. love.timer.getFPS(), 10, 10)
+	love.graphics.print("Body Count: " .. world:getBodyCount( ), 10, 30)
 end
 
 function love.resize()
-	--camera.scale = math.min(love.graphics.getHeight() / 360, love.graphics.getWidth() / 640)
 	renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
-	--camera.x, camera.y = Player.x, Player.y
 end
 
 function love.wheelmoved(_, y)
@@ -155,6 +154,10 @@ function love.keypressed(key)
 	if key == "f" then
 		love.window.setFullscreen(not love.window.getFullscreen())
 		renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
+	end
+
+	if key == "v" then
+		love.window.setVSync(love.window.getVSync() == 0 and 1 or 0)
 	end
 
 	if key == "f2" then

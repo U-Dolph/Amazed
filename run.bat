@@ -1,1 +1,1 @@
-love .
+call "C:\Program Files\LOVE\love.exe" .

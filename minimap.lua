@@ -1,6 +1,6 @@
 local minimap = {}
 
-function minimap:new(_x, _y, _w, _h, _tilesHorizontal, _tilesVertical)
+function minimap:new(_x, _y, _w, _h, _horizontalSize, _verticalSize)
 	local self = {}
 
 	self.x = _x
@@ -9,58 +9,62 @@ function minimap:new(_x, _y, _w, _h, _tilesHorizontal, _tilesVertical)
 	self.width = _w
 	self.height = _h
 
-	self.horizontalSize = _tilesHorizontal
-	self.verticalSize = _tilesVertical
+	self.roomSize = Maze.roomSize
 
-	self.blockWidth = self.width / self.horizontalSize
-	self.blockHeight = self.height / self.verticalSize
+	self.roomsHorizontal = mazeWidth
+	self.roomsVertical = mazeHeight
 
 	self.frame = love.graphics.newImage("gfx/minimapFrame.png")
-
+	self.background = love.graphics.newImage("gfx/mapBackground.png")
 
 	function self:render()
-		love.graphics.push()
-		love.graphics.setColor(0, 0, 1, 1)
-		--love.graphics.scale(1/renderScale, 1/renderScale)
-		love.graphics.rectangle("fill", (self.x + 6.5) * renderScale, (self.y + 6.5) * renderScale, (self.width - 1) * renderScale, (self.height - 1) * renderScale)
+		local normalizedPlayerX = Player.x / (self.roomSize * self.roomsHorizontal * Maze.tileSize)
+		local normalizedPlayerY = Player.y / (self.roomSize * self.roomsVertical * Maze.tileSize)
+		local diffHorizontal = (self.roomSize * self.roomsHorizontal) - self.width + 20
+		local diffVertical = (self.roomSize * self.roomsVertical) - self.height + 20
+		love.graphics.draw(self.background, self.x, self.y)
 
-		love.graphics.setColor(1, 1, 1, 1)
-		love.graphics.rectangle("line", (self.x + 6.5) * renderScale, (self.y + 6.5) * renderScale, (self.width - 1) * renderScale, (self.height - 1) * renderScale)
+		love.graphics.push()
+		love.graphics.translate(10 + math.ceil(-normalizedPlayerX * diffHorizontal), 10 + math.ceil(-normalizedPlayerY * diffVertical))
+
+		love.graphics.setScissor(self.x + 6, self.y + 6, self.width, self.height)
 
 		for _, j in ipairs(Maze.rooms) do
 			if j.explored then
-				love.graphics.setColor(0.2, 0.2, 0.2)
-				love.graphics.rectangle("fill", self.x + 6 + j.x * self.blockWidth, self.y + 6 + j.y * self.blockHeight, self.blockWidth, self.blockHeight)
-				love.graphics.setColor(1, 1, 1)
+				love.graphics.setColor(0, 0, 0, 0.3)
+				love.graphics.rectangle("fill", self.x + 6 + j.x * self.roomSize, self.y + 6 + j.y * self.roomSize, self.roomSize, self.roomSize)
+				love.graphics.setColor(110/255, 74/255, 72/255)
 				love.graphics.setLineStyle("rough")
 
 				if j.path[1] == 0 then
-					love.graphics.line(self.x + 6 + j.x * self.blockWidth, self.y + 6 + j.y * self.blockHeight, self.x + 6 + j.x * self.blockWidth + self.blockWidth, self.y + 6 + j.y * self.blockHeight)
+					love.graphics.line(self.x + 6 + j.x * self.roomSize, self.y + 6.5 + j.y * self.roomSize, self.x + 6 + j.x * self.roomSize + self.roomSize, self.y + 6.5 + j.y * self.roomSize)
 				end
 
 				if j.path[2] == 0 then
-					love.graphics.line(self.x + 6 + j.x * self.blockWidth + self.blockWidth, self.y + 6 + j.y * self.blockHeight, self.x + 6 + j.x * self.blockWidth + self.blockWidth, self.y + 6 + j.y * self.blockHeight + self.blockHeight)
+					love.graphics.line(self.x + 6 + j.x * self.roomSize + self.roomSize, self.y + 6 + j.y * self.roomSize, self.x + 6 + j.x * self.roomSize + self.roomSize, self.y + 6 + j.y * self.roomSize + self.roomSize)
 				end
 
 				if j.path[3] == 0 then
-					love.graphics.line(self.x + 5.5 + j.x * self.blockWidth, self.y + 5.5 + j.y * self.blockHeight + self.blockHeight, self.x + 5.5 + j.x * self.blockWidth + self.blockWidth, self.y + 5.5 + j.y * self.blockHeight + self.blockHeight)
+					love.graphics.line(self.x + 6 + j.x * self.roomSize, self.y + 5.5 + j.y * self.roomSize + self.roomSize, self.x + 6 + j.x * self.roomSize + self.roomSize, self.y + 5.5 + j.y * self.roomSize + self.roomSize)
 				end
 
 				if j.path[4] == 0 then
-					love.graphics.line(self.x + 6 + j.x * self.blockWidth, self.y + 6 + j.y * self.blockHeight, self.x + 6 + j.x * self.blockWidth, self.y + 6 + j.y * self.blockHeight + self.blockHeight)
+					love.graphics.line(self.x + 6.5 + j.x * self.roomSize, self.y + 6.5 + j.y * self.roomSize, self.x + 6.5 + j.x * self.roomSize, self.y + 6.5 + j.y * self.roomSize + self.roomSize)
 				end
-			else
-
 			end
 		end
+
+		local playerTileX = math.ceil(Player.x / Maze.tileSize)
+		local playerTileY = math.ceil((Player.y + 6) / Maze.tileSize)
+
+		love.graphics.setColor(0, 1, 0)
+		love.graphics.points(self.x + 6 + playerTileX, self.y + 6 + playerTileY)
+
+		love.graphics.setScissor( )
 		love.graphics.pop()
 
-		playerNormalizedX = Player.x / (Maze.width * Maze.tileSize * Maze.roomSize) * 640 * (self.width / 648)
-		playerNormalizedY = Player.y / (Maze.height * Maze.tileSize * Maze.roomSize) * 360 * (self.height / 364)
-		love.graphics.setColor(0, 1, 0)
-		love.graphics.points(self.x + 6 + playerNormalizedX + 1, self.y + 6 + playerNormalizedY + 1)
 		love.graphics.setColor(1, 1, 1)
-		love.graphics.draw(self.frame, self.x, self.y, 0, 1)
+		love.graphics.draw(self.frame, self.x, self.y)
 	end
 
 	return self
