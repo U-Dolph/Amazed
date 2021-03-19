@@ -92,6 +92,8 @@ function love.load()
 	lightCanvas = love.graphics.newCanvas(640, 360)
 
 	doDrawColliders = false
+
+	doDrawLight = true
 end
 
 function love.update(dt)
@@ -115,7 +117,7 @@ function love.draw()
 		end)
 
 		love.graphics.setBlendMode("multiply", "premultiplied")
-		love.graphics.draw(lightCanvas)
+		if doDrawLight then love.graphics.draw(lightCanvas) end
 		love.graphics.setBlendMode("alpha")
 		Minimap:render()
 	love.graphics.reset()
@@ -125,6 +127,8 @@ function love.draw()
 	love.graphics.print("FPS:" .. love.timer.getFPS(), 10, 10)
 	love.graphics.print("Body Count: " .. world:getBodyCount( ), 10, 30)
 	love.graphics.print("Rooms rendered: " .. roomsRendered, 10, 50)
+
+	--cam.scale = 0.5
 end
 
 function love.resize()
@@ -160,6 +164,10 @@ function love.keypressed(key)
 
 	if key == "v" then
 		love.window.setVSync(love.window.getVSync() == 0 and 1 or 0)
+	end
+
+	if key == "l" then
+		doDrawLight = not doDrawLight
 	end
 
 	if key == "f2" then

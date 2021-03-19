@@ -164,7 +164,6 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 		for _, j in ipairs(self.rooms) do
 			if j.visited then
 				j:createTilemap()
-				--j:createColliders()
 				j:createShadowboxes()
 			end
 		end
@@ -263,6 +262,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 
 	function self:render()
 		local numOfRooms = 0
+		local roomsToRender = {}
 		for _, j in ipairs(self.rooms) do
             --[[if j.visited then
                 if j.node == self.startNode then
@@ -274,16 +274,16 @@ function maze:new(_w, _h, _tileSize, _roomSize)
                     love.graphics.circle("fill", j.node.renderX, j.node.renderY, j.node.renderRadius, 100)
                 end
             end]]
-
-			local xLeft, yTop = cam:toScreen(j.renderX, j.renderY)
-			local xRight, yBottom = cam:toScreen(j.renderX + j.w, j.renderY + j.h)
-
-			if xRight > 0 and xLeft < 640 and yBottom > 0 and yTop < 360 then
-				j:render()
-				numOfRooms = numOfRooms + 1
-			end
-
+			
 			if j.renderX + j.w >= Player.x and j.renderX <= Player.x and j.renderY + j.h >= Player.y and j.renderY <= Player.y then
+				roomsToRender = self:depthSearch(j, 3)
+
+				numOfRooms = #roomsToRender
+
+				for _, l in ipairs(roomsToRender) do
+					l:render()
+				end
+
 				--j:render()
 			end
         end
@@ -324,6 +324,72 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 				end
 			end
 		end
+	end
+
+	function self:depthSearch(_element, _depth)
+		local roomsFound = {}
+
+		if _depth > 0 then
+			local subRoomsFound = {}
+
+			if _element.path[1] == 1 then
+				table.insert(roomsFound, self.rooms[self:getIndex(0, -1, _element)])
+				subroomsFound = self:depthSearch(self.rooms[self:getIndex(0, -1, _element)], _depth - 1)
+
+				for i, j in ipairs(subroomsFound) do
+					table.insert(roomsFound, j)
+				end
+			end
+
+			if _element.path[2] == 1 then
+				table.insert(roomsFound, self.rooms[self:getIndex(1, 0, _element)])
+
+				subroomsFound = self:depthSearch(self.rooms[self:getIndex(1, 0, _element)], _depth - 1)
+
+				for i, j in ipairs(subroomsFound) do
+					table.insert(roomsFound, j)
+				end
+			end
+
+			if _element.path[3] == 1 then
+				table.insert(roomsFound, self.rooms[self:getIndex(0, 1, _element)])
+
+				subroomsFound = self:depthSearch(self.rooms[self:getIndex(0, 1, _element)], _depth - 1)
+
+				for i, j in ipairs(subroomsFound) do
+					table.insert(roomsFound, j)
+				end
+			end
+
+			if _element.path[4] == 1 then
+				table.insert(roomsFound, self.rooms[self:getIndex(-1, 0, _element)])
+
+				subroomsFound = self:depthSearch(self.rooms[self:getIndex(-1, 0, _element)], _depth - 1)
+
+				for i, j in ipairs(subroomsFound) do
+					table.insert(roomsFound, j)
+				end
+			end
+		end
+
+		local result = {}
+
+		for i, j in ipairs(roomsFound) do
+			local valid = true
+
+			for k, l in ipairs(result) do
+				if l == j then valid = false end
+			end
+
+			local xLeft, yTop = cam:toScreen(j.renderX, j.renderY)
+			local xRight, yBottom = cam:toScreen(j.renderX + j.w, j.renderY + j.h)
+
+			if valid and xRight > 0 and xLeft < 640 and yBottom > 0 and yTop < 360 then
+				table.insert(result, j)
+			end
+		end
+
+		return result
 	end
 
 	return self

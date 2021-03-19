@@ -37,7 +37,7 @@ function room:new(_x, _y, _tileSize, _roomSize)
 			end
 
 			love.graphics.setColor(1, 1, 1, 0.2)
-			love.graphics.rectangle("line", self.renderX, self.renderY, self.w, self.h)
+			--love.graphics.rectangle("line", self.renderX, self.renderY, self.w, self.h)
 			love.graphics.setColor(1,1,1,1)
 
 			--if self.path[1] == 0 and not self.previsited then love.graphics.line(self.renderX, self.renderY, self.renderX + self.w, self.renderY) end
