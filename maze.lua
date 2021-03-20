@@ -253,7 +253,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 			self.startNode = self.rooms[startIndex].node
 
 			--Pick a random exit
-			while not self.rooms[endIndex].isNode do endIndex = love.math.random(#self.rooms) end
+			while not (self.rooms[endIndex].isNode and self.rooms[endIndex].path[1] == 0) do endIndex = love.math.random(#self.rooms) end
 			self.endNode = self.rooms[endIndex].node
 
 			self:solvePath()
@@ -288,16 +288,16 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 			end
         end
 
-		return numOfRooms
-
 		--[[love.graphics.setColor(1, 0, 0)
-
+		
         local tempNode = self.endNode
-
+		
         while tempNode.parent do
             love.graphics.line(tempNode.renderX, tempNode.renderY, tempNode.parent.renderX, tempNode.parent.renderY)
             tempNode = tempNode.parent
         end]]
+		
+		return numOfRooms
 	end
 
 	function self:update(dt)

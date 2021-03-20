@@ -36,9 +36,12 @@ function room:new(_x, _y, _tileSize, _roomSize)
 				love.graphics.setColor(1,1,1,1)
 			end
 
-			love.graphics.setColor(1, 1, 1, 0.2)
+			--[[if self.isNode and self.node == Maze.endNode then
+				love.graphics.setColor(1, 0, 0, 0.2)
+				love.graphics.rectangle("fill", self.renderX, self.renderY, self.w, self.h)
+				love.graphics.setColor(1,1,1,1)
+			end]]
 			--love.graphics.rectangle("line", self.renderX, self.renderY, self.w, self.h)
-			love.graphics.setColor(1,1,1,1)
 
 			--if self.path[1] == 0 and not self.previsited then love.graphics.line(self.renderX, self.renderY, self.renderX + self.w, self.renderY) end
 			--if self.path[2] == 0 and not self.previsited then love.graphics.line(self.renderX + self.w, self.renderY, self.renderX + self.w, self.renderY + self.h) end
@@ -74,6 +77,12 @@ function room:new(_x, _y, _tileSize, _roomSize)
 						self.tilemap[#self.tilemap].floorImage = wallLeftImages[love.math.random(#wallLeftImages)]
 					elseif self.path[2] == 0 and x == self.size - 1 then
 						self.tilemap[#self.tilemap].floorImage = wallRightImages[love.math.random(#wallRightImages)]
+					end
+
+					--?Place the exit if needed
+					if self.isNode and self.node == Maze.endNode then
+						if x == self.size / 2 - 1 then self.tilemap[#self.tilemap].floorImage = exitImages[1] print("fasz")
+						elseif x == self.size / 2 then self.tilemap[#self.tilemap].floorImage = exitImages[2] print("geci") end
 					end
 				--?Rooms bottom row
 				elseif y == self.size - 1 then
@@ -178,37 +187,45 @@ function room:new(_x, _y, _tileSize, _roomSize)
 
 	function self:createColliders()
 		if self.path[1] == 0 then
-			table.insert(self.colliders, world:newRectangleCollider(
+			table.insert(self.colliders, world:newChainCollider(false, {
 				self.renderX, self.renderY,
-				self.w, self.tileSize
-			))
+				self.renderX, self.renderY + self.tileSize,
+				self.renderX + self.w, self.renderY + self.tileSize,
+				self.renderX + self.w, self.renderY
+			}))
 			self.colliders[#self.colliders]:setType("static")
 			self.colliders[#self.colliders]:setCollisionClass("Wall")
 		end
 
 		if self.path[3] == 0 then
-			table.insert(self.colliders, world:newRectangleCollider(
+			table.insert(self.colliders, world:newChainCollider(false, {
+				self.renderX, self.renderY + self.h,
 				self.renderX, self.renderY + self.h - self.tileSize,
-				self.w, self.tileSize
-			))
+				self.renderX + self.w, self.renderY + self.h - self.tileSize,
+				self.renderX + self.w, self.renderY + self.h
+			}))
 			self.colliders[#self.colliders]:setType("static")
 			self.colliders[#self.colliders]:setCollisionClass("Wall")
 		end
 
 		if self.path[2] == 0 then
-			table.insert(self.colliders, world:newRectangleCollider(
+			table.insert(self.colliders, world:newChainCollider(false, {
+				self.renderX + self.w, self.renderY,
 				self.renderX + self.w - self.tileSize, self.renderY,
-				self.tileSize, self.h
-			))
+				self.renderX + self.w - self.tileSize, self.renderY + self.h,
+				self.renderX + self.w, self.renderY + self.h,
+			}))
 			self.colliders[#self.colliders]:setType("static")
 			self.colliders[#self.colliders]:setCollisionClass("Wall")
 		end
 
 		if self.path[4] == 0 then
-			table.insert(self.colliders, world:newRectangleCollider(
+			table.insert(self.colliders, world:newChainCollider(false, {
 				self.renderX, self.renderY,
-				self.tileSize, self.h
-			))
+				self.renderX + self.tileSize, self.renderY,
+				self.renderX + self.tileSize, self.renderY + self.h,
+				self.renderX, self.renderY + self.h,
+			}))
 			self.colliders[#self.colliders]:setType("static")
 			self.colliders[#self.colliders]:setCollisionClass("Wall")
 		end
@@ -223,40 +240,44 @@ function room:new(_x, _y, _tileSize, _roomSize)
 
 		--?Top Right
 		if self.path[1] == 1 and self.path[2] == 1 and neighbours[1] and neighbours[1].path[4] == 0 and neighbours[1].path[3] == 0 then
-			table.insert(self.colliders, world:newRectangleCollider(
+			table.insert(self.colliders, world:newChainCollider(false, {
 				self.renderX + self.w - self.tileSize, self.renderY,
-				self.tileSize, self.tileSize
-			))
+				self.renderX + self.w - self.tileSize, self.renderY + self.tileSize,
+				self.renderX + self.w, self.renderY + self.tileSize
+			}))
 			self.colliders[#self.colliders]:setType("static")
 			self.colliders[#self.colliders]:setCollisionClass("Wall")
 		end
 
 		--?Bottom Right
 		if self.path[2] == 1 and self.path[3] == 1 and neighbours[2] and neighbours[2].path[1] == 0 and neighbours[2].path[4] == 0 then
-			table.insert(self.colliders, world:newRectangleCollider(
+			table.insert(self.colliders, world:newChainCollider(false, {
+				self.renderX + self.w - self.tileSize, self.renderY + self.h,
 				self.renderX + self.w - self.tileSize, self.renderY + self.h - self.tileSize,
-				self.tileSize, self.tileSize
-			))
+				self.renderX + self.w, self.renderY + self.h - self.tileSize
+			}))
 			self.colliders[#self.colliders]:setType("static")
 			self.colliders[#self.colliders]:setCollisionClass("Wall")
 		end
 
 		--?Bottom Left
 		if self.path[3] == 1 and self.path[4] == 1 and neighbours[3] and neighbours[3].path[1] == 0 and neighbours[3].path[2] == 0 then
-			table.insert(self.colliders, world:newRectangleCollider(
+			table.insert(self.colliders, world:newChainCollider(false, {
 				self.renderX, self.renderY + self.h - self.tileSize,
-				self.tileSize, self.tileSize
-			))
+				self.renderX + self.tileSize, self.renderY + self.h - self.tileSize,
+				self.renderX + self.tileSize, self.renderY + self.h
+			}))
 			self.colliders[#self.colliders]:setType("static")
 			self.colliders[#self.colliders]:setCollisionClass("Wall")
 		end
 
 		--?Top Left
 		if self.path[4] == 1 and self.path[1] == 1 and neighbours[4] and neighbours[4].path[2] == 0 and neighbours[4].path[3] == 0 then
-			table.insert(self.colliders, world:newRectangleCollider(
-				self.renderX, self.renderY,
-				self.tileSize, self.tileSize
-			))
+			table.insert(self.colliders, world:newChainCollider(false, {
+				self.renderX + self.tileSize, self.renderY,
+				self.renderX + self.tileSize, self.renderY + self.tileSize,
+				self.renderX, self.renderY + self.tileSize
+			}))
 			self.colliders[#self.colliders]:setType("static")
 			self.colliders[#self.colliders]:setCollisionClass("Wall")
 		end

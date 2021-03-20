@@ -32,6 +32,8 @@ function minimap:new(_x, _y, _w, _h, _horizontalSize, _verticalSize)
 		for _, j in ipairs(Maze.rooms) do
 			if j.explored then
 				love.graphics.setColor(0, 0, 0, 0.3)
+				if j.node == Maze.endNode then love.graphics.setColor(0.5, 0.5, 1, 0.3) end
+
 				love.graphics.rectangle("fill", self.x + 6 + j.x * self.roomSize, self.y + 6 + j.y * self.roomSize, self.roomSize, self.roomSize)
 				love.graphics.setColor(110/255, 74/255, 72/255)
 				love.graphics.setLineStyle("rough")

@@ -6,24 +6,28 @@ function player:new(_x, _y)
 	self.x = _x
 	self.y = _y
 
-	local grid = anim8.newGrid(16, 32, animationImage:getWidth(), animationImage:getHeight())
+	local grid 		= anim8.newGrid(16, 32, animationImage:getWidth(), animationImage:getHeight())
+	local smokeGrid = anim8.newGrid(32, 32, smokeImage:getWidth(), smokeImage:getHeight())
+
 	self.idleAnimation = anim8.newAnimation(grid('9-12', 4), 0.10)
 	self.runAnimation = anim8.newAnimation(grid('12-16', 4), 0.10)
 	self.dashAnimation = anim8.newAnimation(grid(14,4, 17,4, 15,4), 0.10)
 	self.currentAnimation = self.idleAnimation
-
-	local smokeAnimation = love.graphics.newImage("gfx/smoke.png")
-	local smokeGrid = anim8.newGrid(32, 32, smokeAnimation:getWidth(), smokeAnimation:getHeight())
 	self.smokeAnimation = anim8.newAnimation(smokeGrid('1-9', 1), 0.05, 'pauseAtEnd')
+
 	self.dashPositions = {}
+
 	self.timer = Timer.new()
+
 	self.canDash = true
 	self.canDodge = true
 	self.canAttack = true
 
-	local hitHandle = nil
-
 	self.currentFrame = 0
+
+	self.health = 100
+
+	self.moveSpeed = 20
 
 	self.sword = {
 		image = love.graphics.newImage("gfx/sword.png"),
@@ -54,21 +58,21 @@ function player:new(_x, _y)
 
 		if self.state ~= "dashing" then
 			if love.keyboard.isDown("w") then
-				self.footCollider:applyForce(0, -20)
+				self.footCollider:applyForce(0, -self.moveSpeed)
 				self.state = "running"
 
 			elseif love.keyboard.isDown("s") then
-				self.footCollider:applyForce(0, 20)
+				self.footCollider:applyForce(0, self.moveSpeed)
 				self.state = "running"
 			end
 
 			if love.keyboard.isDown("a") then
-				self.footCollider:applyForce(-20, 0)
+				self.footCollider:applyForce(-self.moveSpeed, 0)
 				self.state = "running"
 				self.direction = -1
 
 			elseif love.keyboard.isDown("d") then
-				self.footCollider:applyForce(20, 0)
+				self.footCollider:applyForce(self.moveSpeed, 0)
 				self.state = "running"
 				self.direction = 1
 			end
@@ -147,8 +151,6 @@ function player:new(_x, _y)
 				self.timer:tween(0.05, self.sword, {angle = 0.15 * math.pi, xOffset = 5, yOffset = 2}, "in-linear")
 			end)
 
-			--if hitHandle then self.timer:cancel(hitHandle) end
-
 			self.timer:after(0.16, function() self.canAttack = true end)
 		end
 	end
@@ -157,7 +159,7 @@ function player:new(_x, _y)
 		love.graphics.setColor(1, 1, 1, 1)
 
 		for _, j in ipairs(self.dashPositions) do
-			j.anim:draw(smokeAnimation, j.x, j.y, 0, j.scale or 1, j.scale or 1, 16, 16)
+			j.anim:draw(smokeImage, j.x, j.y, 0, j.scale or 1, j.scale or 1, 16, 16)
 		end
 
 		love.graphics.draw(self.sword.image, self.x + self.sword.xOffset * self.direction, self.y + self.sword.yOffset - self.sword.animationOffsets[self.state][self.currentFrame], self.sword.angle * self.direction, 1, 1, 5, 15)

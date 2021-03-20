@@ -7,9 +7,10 @@ gamera 		= require 'lib/gamera'
 player 	= require "player"
 maze 	= require "maze"
 minimap = require "minimap"
+HUD 	= require "HUD"
 
-mazeWidth = 30
-mazeHeight = 30
+mazeWidth = 20
+mazeHeight = 20
 
 renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
 
@@ -34,7 +35,7 @@ function love.load()
 
 	Player = player:new(Maze.startNode.renderX, Maze.startNode.renderY)
 
-	Minimap = minimap:new(518, 10, 100, 100)
+	hud = HUD:new()
 
 	canvas 		= love.graphics.newCanvas(640, 360)
 	lightCanvas = love.graphics.newCanvas(640, 360)
@@ -66,7 +67,8 @@ function love.draw()
 		love.graphics.setBlendMode("multiply", "premultiplied")
 		if doDrawLight then love.graphics.draw(lightCanvas) end
 		love.graphics.setBlendMode("alpha")
-		Minimap:render()
+
+		hud:render()
 	love.graphics.reset()
 
 	love.graphics.draw(canvas, math.floor(love.graphics.getWidth()/2), math.floor(love.graphics.getHeight()/2), 0, renderScale, renderScale, math.floor(canvas:getWidth()/2), math.floor(canvas:getHeight()/2))
@@ -132,6 +134,7 @@ end
 function loadSpritesheet()
 	tilemap = love.graphics.newImage("gfx/Dungeon_Tileset.png")
 	animationImage = love.graphics.newImage("gfx/0x72_DungeonTilesetII_v1.3.png")
+	smokeImage = love.graphics.newImage("gfx/smoke.png")
 
 	floorImages = {
 		love.graphics.newQuad(96, 0, 16, 16, tilemap),
@@ -181,5 +184,10 @@ function loadSpritesheet()
 	wallRightOuterCornerImages = {
 		love.graphics.newQuad(0, 80, 16, 16, tilemap),
 		love.graphics.newQuad(64, 80, 16, 16, tilemap)
+	}
+
+	exitImages = {
+		love.graphics.newQuad(96, 48, 16, 16, tilemap),
+		love.graphics.newQuad(112, 48, 16, 16, tilemap)
 	}
 end
