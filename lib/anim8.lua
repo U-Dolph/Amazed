@@ -235,6 +235,7 @@ function Animation:update(dt)
   end
 
   self.position = seekFrameIndex(self.intervals, self.timer)
+  return self.position
 end
 
 function Animation:pause()

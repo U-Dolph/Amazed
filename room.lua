@@ -280,7 +280,7 @@ function room:new(_x, _y, _tileSize, _roomSize)
 				widthModifier[1] = 7
 			end
 
-			lighter:addPolygon({
+			lightWorld:addPolygon({
 				self.renderX + widthModifier[1], self.renderY + self.h - 8,
 				self.renderX + self.w + widthModifier[2], self.renderY + self.h - 8,
 				self.renderX + self.w + widthModifier[2], self.renderY + self.h,
@@ -299,7 +299,7 @@ function room:new(_x, _y, _tileSize, _roomSize)
 				heightModifier[2] = -16
 			end
 
-			lighter:addPolygon({
+			lightWorld:addPolygon({
 				self.renderX + self.w - self.tileSize + 7, self.renderY + heightModifier[1],
 				self.renderX + self.w, self.renderY + heightModifier[1],
 				self.renderX + self.w, self.renderY + self.h + heightModifier[2],
@@ -317,7 +317,7 @@ function room:new(_x, _y, _tileSize, _roomSize)
 				heightModifier[2] = -16
 			end
 
-			lighter:addPolygon({
+			lightWorld:addPolygon({
 				self.renderX, self.renderY + heightModifier[1],
 				self.renderX + 9, self.renderY + heightModifier[1],
 				self.renderX + 9, self.renderY + self.h + heightModifier[2],
@@ -327,7 +327,7 @@ function room:new(_x, _y, _tileSize, _roomSize)
 
 		--*PLACE MISSING CORNERS
 		if self.path[2] == 1 and self.path[3] == 1 and neighbours[2] and neighbours[2].path[1] == 0 and neighbours[2].path[4] == 0 then
-			lighter:addPolygon({
+			lightWorld:addPolygon({
 				self.renderX + self.w - 9, self.renderY + self.h - 8,
 				self.renderX + self.w, self.renderY + self.h - 8,
 				self.renderX + self.w, self.renderY + self.h,
@@ -336,7 +336,7 @@ function room:new(_x, _y, _tileSize, _roomSize)
 		end
 
 		if self.path[4] == 1 and self.path[3] == 1 and neighbours[3] and neighbours[3].path[1] == 0 and neighbours[3].path[2] == 0 then
-			lighter:addPolygon({
+			lightWorld:addPolygon({
 				self.renderX, self.renderY + self.h - 8,
 				self.renderX + 9, self.renderY + self.h - 8,
 				self.renderX + 9, self.renderY + self.h,
