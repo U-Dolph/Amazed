@@ -9,10 +9,12 @@ function player:new(_x, _y)
 	local grid 		= anim8.newGrid(16, 32, animationImage:getWidth(), animationImage:getHeight())
 	local smokeGrid = anim8.newGrid(32, 32, smokeImage:getWidth(), smokeImage:getHeight())
 
-	self.idleAnimation = anim8.newAnimation(grid('9-12', 4), 0.10)
-	self.runAnimation = anim8.newAnimation(grid('12-16', 4), 0.10)
-	self.dashAnimation = anim8.newAnimation(grid(14,4, 17,4, 15,4), 0.10)
-	self.currentAnimation = self.idleAnimation
+	self.animations = {
+		["idle"] = anim8.newAnimation(grid('9-12', 4), 0.10),
+		["running"] = anim8.newAnimation(grid('12-16', 4), 0.10),
+		["dashing"] = anim8.newAnimation(grid(14,4, 17,4, 15,4), 0.10)
+	}
+
 	self.smokeAnimation = anim8.newAnimation(smokeGrid('1-9', 1), 0.05, 'pauseAtEnd')
 
 	self.dashPositions = {}
@@ -26,14 +28,19 @@ function player:new(_x, _y)
 	self.currentFrame = 0
 
 	self.health = 100
-
+	self.maxHealth = 100
+	self.power = 50
 	self.moveSpeed = 20
+
+	self.state = "idle"
+	self.direction = 1
 
 	self.sword = {
 		image = love.graphics.newImage("gfx/sword.png"),
 		angle = 0.15 * math.pi,
 		xOffset = 5,
 		yOffset = 2,
+		isDownSwinging = false,
 
 		animationOffsets = {
 			["idle"] = {2, 1, 0, 1},
@@ -42,13 +49,11 @@ function player:new(_x, _y)
 		}
 	}
 
-	self.state = "idle"
-	self.direction = 1
-
 	self.footCollider = world:newRectangleCollider(self.x - 6, self.y + 6, 12, 3)
 	self.footCollider:setLinearDamping(5)
 	self.footCollider:setFixedRotation(true)
 	self.footCollider:setMass(self.footCollider:getMass() / 3)
+	self.footCollider:setCollisionClass("PlayerFoot")
 
 	self.light = lightWorld:addLight(self.x, self.y, 360, 1, 1, 1)
 
@@ -78,20 +83,10 @@ function player:new(_x, _y)
 			end
 		end
 
+		self.currentFrame = self.animations[self.state]:update(dt)
+
 		self.x = self.footCollider:getX()
 		self.y = self.footCollider:getY() - 6
-
-		if self.state == "idle" then
-			self.currentAnimation = self.idleAnimation
-
-		elseif self.state == "running" then
-			self.currentAnimation = self.runAnimation
-
-		elseif self.state == "dashing" then
-			self.currentAnimation = self.dashAnimation
-		end
-
-		self.currentFrame = self.currentAnimation:update(dt)
 
 		for i, j in ipairs(self.dashPositions) do
 			j.anim:update(dt)
@@ -118,7 +113,7 @@ function player:new(_x, _y)
 			self.canAttack = false
 			self.state = "dashing"
 
-			self.dashAnimation:gotoFrame(1)
+			self.animations[self.state]:gotoFrame(1)
 
 			self.timer:after(0.75, function() self.canDash = true end)
 			self.timer:after(0.3, function()
@@ -147,11 +142,21 @@ function player:new(_x, _y)
 		if _button == 1 and self.canAttack then
 			self.direction = _x > self.x and 1 or -1
 			self.canAttack = false
+			self.sword.isDownSwinging = true
 			self.timer:tween(0.08, self.sword, {angle = 0.5 * math.pi, xOffset = 10, yOffset = 5}, "out-cubic", function()
+				self.sword.isDownSwinging = false
 				self.timer:tween(0.05, self.sword, {angle = 0.15 * math.pi, xOffset = 5, yOffset = 2}, "in-linear")
 			end)
 
-			self.timer:after(0.16, function() self.canAttack = true end)
+			self.timer:after(0.13, function() self.canAttack = true end)
+
+			local colliders = world:queryRectangleArea(self.x + math.min(self.direction, 0) * 21, self.y - 8, 21, 18, {"EnemyFoot"})
+			for _, collider in ipairs(colliders) do
+				angle = lume.angle(self.x, self.y, collider:getX(), collider:getY())
+				collider:applyLinearImpulse(math.cos(angle) * 15, math.sin(angle) * 15)
+				local enemy = collider:getObject()
+				enemy.health = enemy.health - 40
+			end
 		end
 	end
 
@@ -163,7 +168,9 @@ function player:new(_x, _y)
 		end
 
 		love.graphics.draw(self.sword.image, self.x + self.sword.xOffset * self.direction, self.y + self.sword.yOffset - self.sword.animationOffsets[self.state][self.currentFrame], self.sword.angle * self.direction, 1, 1, 5, 15)
-		self.currentAnimation:draw(animationImage, self.x, self.y, 0, self.direction, 1, 8, 24)
+		self.animations[self.state]:draw(animationImage, self.x, self.y, 0, self.direction, 1, 8, 24)
+
+		--love.graphics.rectangle("line", self.x + math.min(self.direction, 0) * 21, self.y - 8, 21, 18)
 	end
 
 	return self

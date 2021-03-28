@@ -14,7 +14,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 	self.stack = {}
 	self.rooms = {}
 
-	self.endNode, self.startNode = nil, nil
+	self.endNode, self.startNode, self.startIndex, self.endIndex = nil, nil, nil, nil
 	self.noiseOffsetX, self.noiseOffsetY = nil, nil
 
 	function self:getIndex(_modX, _modY, _element)
@@ -245,16 +245,16 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 			end
 		end
 
-		if self:getDistance() < self.width + self.height then
-			local startIndex, endIndex = love.math.random(#self.rooms), love.math.random(#self.rooms)
+		if self:getDistance() < self.width + self.height or self.startIndex == nil then
+			self.startIndex, self.endIndex = love.math.random(#self.rooms), love.math.random(#self.rooms)
 
 			--Pick a random entrance
-			while not self.rooms[startIndex].isNode do startIndex = love.math.random(#self.rooms) end
-			self.startNode = self.rooms[startIndex].node
+			while not self.rooms[self.startIndex].isNode do self.startIndex = love.math.random(#self.rooms) end
+			self.startNode = self.rooms[self.startIndex].node
 
 			--Pick a random exit
-			while not (self.rooms[endIndex].isNode and self.rooms[endIndex].path[1] == 0) do endIndex = love.math.random(#self.rooms) end
-			self.endNode = self.rooms[endIndex].node
+			while not (self.rooms[self.endIndex].isNode and self.rooms[self.endIndex].path[1] == 0) do self.endIndex = love.math.random(#self.rooms) end
+			self.endNode = self.rooms[self.endIndex].node
 
 			self:solvePath()
 		end

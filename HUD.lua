@@ -18,7 +18,7 @@ function HUD:new()
 	function self:render()
 		self.minimap:render()
 
-		love.graphics.setScissor(self.healthbar.x, self.healthbar.y + 1, self.healthbar.fillImage:getWidth() / 100 * Player.health, 8)
+		love.graphics.setScissor(self.healthbar.x, self.healthbar.y + 1, self.healthbar.fillImage:getWidth() * Player.health / Player.maxHealth, 8)
 		love.graphics.draw(self.healthbar.fillImage, self.healthbar.x, self.healthbar.y + 1)
 		love.graphics.setScissor()
 

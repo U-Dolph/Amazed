@@ -81,8 +81,8 @@ function room:new(_x, _y, _tileSize, _roomSize)
 
 					--?Place the exit if needed
 					if self.isNode and self.node == Maze.endNode then
-						if x == self.size / 2 - 1 then self.tilemap[#self.tilemap].floorImage = exitImages[1] print("fasz")
-						elseif x == self.size / 2 then self.tilemap[#self.tilemap].floorImage = exitImages[2] print("geci") end
+						if x == self.size / 2 - 1 then self.tilemap[#self.tilemap].floorImage = exitImages[1]
+						elseif x == self.size / 2 then self.tilemap[#self.tilemap].floorImage = exitImages[2] end
 					end
 				--?Rooms bottom row
 				elseif y == self.size - 1 then
