@@ -68,7 +68,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 
 		for y = 0, self.height - 1 do
 			for x = 0, self.width - 1 do
-				table.insert(self.rooms, room:new(x, y, self.tileSize, self.roomSize))
+				table.insert(self.rooms, room:new(x, y, self.tileSize, self.roomSize, self))
 			end
 		end
 
@@ -80,8 +80,8 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 		self.rooms[startFrom].visited = true
 	end
 
-	function self:createMaze()
-		self:initMaze(_tileSize, _roomSize)
+	function self:createMaze(isMenuState)
+		self:initMaze()
 		local visitedCells = 0
 
 		--Carving maze
@@ -164,7 +164,11 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 		for _, j in ipairs(self.rooms) do
 			if j.visited then
 				j:createTilemap()
-				j:createShadowboxes()
+
+				--!Don't want shadows in the menu
+				if not isMenuState then
+					j:createShadowboxes()
+				end
 			end
 		end
 	end
@@ -245,6 +249,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 			end
 		end
 
+		--Make exit far from the start
 		if self:getDistance() < self.width + self.height or self.startIndex == nil then
 			self.startIndex, self.endIndex = love.math.random(#self.rooms), love.math.random(#self.rooms)
 
@@ -261,43 +266,27 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 	end
 
 	function self:render()
-		local numOfRooms = 0
-		local roomsToRender = {}
-		for _, j in ipairs(self.rooms) do
-            --[[if j.visited then
-                if j.node == self.startNode then
-                    love.graphics.setColor(0, 1, 0, 1)
-                    love.graphics.circle("fill", j.node.renderX, j.node.renderY, j.node.renderRadius, 100)
+		if Gamestate.current() == menu then
+			for _, j in ipairs(self.rooms) do
+				local left, top, _, _, right, bottom = menu.cam:getVisibleCorners()
+				if j.renderX + j.w >= left and j.renderX <= right and j.renderY + j.h >= top and j.renderY <= bottom then
+					j:render()
+				end
+			end
+		else
+			local roomsToRender = self:depthSearch(Player.currentRoom, _ROOMDEPTH)
 
-                elseif j.node == self.endNode then
-                    love.graphics.setColor(1, 0, 0, 1)
-                    love.graphics.circle("fill", j.node.renderX, j.node.renderY, j.node.renderRadius, 100)
-                end
-            end]]
-			
-			if j.renderX + j.w >= Player.x and j.renderX <= Player.x and j.renderY + j.h >= Player.y and j.renderY <= Player.y then
-				roomsToRender = self:depthSearch(j, 3)
-
-				numOfRooms = #roomsToRender
-
+			for _, j in ipairs(self.rooms) do
+				j.visible = false
 				for _, l in ipairs(roomsToRender) do
-					l:render()
+					if j == l then j.visible = true end
 				end
 
-				--j:render()
+				if j.visible then j:render() end
 			end
-        end
 
-		--[[love.graphics.setColor(1, 0, 0)
-		
-        local tempNode = self.endNode
-		
-        while tempNode.parent do
-            love.graphics.line(tempNode.renderX, tempNode.renderY, tempNode.parent.renderX, tempNode.parent.renderY)
-            tempNode = tempNode.parent
-        end]]
-		
-		return numOfRooms
+			return #roomsToRender
+		end
 	end
 
 	function self:update(dt)
@@ -328,6 +317,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 
 	function self:depthSearch(_element, _depth)
 		local roomsFound = {}
+		table.insert(roomsFound, _element)
 
 		if _depth > 0 then
 			local subRoomsFound = {}
@@ -375,6 +365,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 		local result = {}
 
 		for i, j in ipairs(roomsFound) do
+			--j.visible = false
 			local valid = true
 
 			for k, l in ipairs(result) do

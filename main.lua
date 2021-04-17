@@ -1,3 +1,5 @@
+moonshine = require "lib/moonshine"
+Gamestate 	= require "lib/gamestate"
 lume 		= require "lib/lume"
 lurker 		= require "lib/lurker"
 Timer 		= require "lib/timer"
@@ -13,15 +15,26 @@ HUD 		= require "HUD"
 enemy 		= require "enemy"
 smallEnemy 	= require "enemies/smallEnemy"
 
+--*GAMESTATES*--
+require "gamestates/menu"
+
 mazeWidth = 20
 mazeHeight = 20
 
 renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
 
+_ROOMDEPTH = 3
+
 function love.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	loadSpritesheet()
 
+	Gamestate.registerEvents{'keypressed'}
+	Gamestate.switch(menu)
+
+	canvas = love.graphics.newCanvas(640, 360)
+
+	--[[
 	cursor = love.mouse.newCursor( "gfx/cursor.png", 11, 11)
 	love.mouse.setCursor(cursor)
 
@@ -43,7 +56,7 @@ function love.load()
 
 	hud = HUD:new()
 
-	canvas 		= love.graphics.newCanvas(640, 360)
+	
 	lightCanvas = love.graphics.newCanvas(640, 360)
 
 	doDrawColliders = false
@@ -51,10 +64,13 @@ function love.load()
 
 	Enemies = {}
 	spawnEnemies()
+	]]
 end
 
 function love.update(dt)
-	lurker.update(dt)
+	lurker.update()
+	Gamestate.update(dt)
+	--[[
 	world:update(dt)
 	Maze:update(dt)
 	Player:update(dt)
@@ -62,31 +78,33 @@ function love.update(dt)
 
 	local entities = getEntitiesToRender(true)
 
-	for i = #Enemies, 1, -1 do
-		Enemies[i]:update(dt)
+	for i, j in ipairs(Enemies) do
+		j:update(dt)
 
-		if Enemies[i].health <= 0 then
-			if Enemies[i].state ~= "explosion" then
-				Enemies[i].state = "explosion"
-				Enemies[i].footCollider:destroy()
-				Enemies[i].bodyCollider:destroy()
-				Enemies[i].timer:after(0.8, function() Enemies[i].alive = false end)
+		if j.health <= 0 then
+			if j.state ~= "explosion" then
+				j.state = "explosion"
+				j.footCollider:destroy()
+				j.bodyCollider:destroy()
+				j.timer:after(0.8, function() j.alive = false end)
 			end
-
-			if not Enemies[i].alive then table.remove(Enemies, i) end
 		end
+
+		if not j.alive then table.remove(Enemies, i) end
 	end
 
 	preDrawLights()
+	]]
 end
 
 function love.draw()
-	local roomsRendered = 0
-	local entities = getEntitiesToRender()
+	--local roomsRendered = 0
+	--local entities = getEntitiesToRender()
 	love.graphics.setCanvas({canvas, stencil = true})
 		love.graphics.clear()
+		Gamestate.draw()
 
-		cam:draw(function(l,t,w,h)
+		--[[cam:draw(function(l,t,w,h)
 			roomsRendered = Maze:render()
 			--Player:render()
 			for i, j in ipairs(entities) do
@@ -99,15 +117,17 @@ function love.draw()
 		if doDrawLight then love.graphics.draw(lightCanvas) end
 		love.graphics.setBlendMode("alpha")
 
-		hud:render()
+		hud:render()]]
 	love.graphics.reset()
 
 	love.graphics.draw(canvas, math.floor(love.graphics.getWidth()/2), math.floor(love.graphics.getHeight()/2), 0, renderScale, renderScale, math.floor(canvas:getWidth()/2), math.floor(canvas:getHeight()/2))
 
 	love.graphics.print("FPS:" .. love.timer.getFPS(), 10, 10)
-	love.graphics.print("Body Count: " .. world:getBodyCount( ), 10, 30)
+	--[[love.graphics.print("Body Count: " .. world:getBodyCount( ), 10, 30)
 	love.graphics.print("Rooms rendered: " .. roomsRendered, 10, 50)
 	love.graphics.print("Entities rendered: " .. #entities, 10, 70)
+	love.graphics.print("Render depth: " .. _ROOMDEPTH, 10, 90)
+	]]
 end
 
 function love.resize()
@@ -115,11 +135,15 @@ function love.resize()
 end
 
 function love.mousepressed(x, y, button)
-	Player:getMousepresses(x, y, button)
+	--Player:getMousepresses(x, y, button)
+end
+
+function love.wheelmoved(x, y)
+	--_ROOMDEPTH = _ROOMDEPTH + y
 end
 
 function love.keypressed(key)
-	Player:getKeypress(key)
+	--Player:getKeypress(key)
 
 	if key == "escape" then
 		love.event.quit()
@@ -149,15 +173,24 @@ function love.keypressed(key)
 	if key == "f2" then
 		doDrawColliders = not doDrawColliders
 	end
+
+	--*FOR DEBUG ONLY*--
+	if key == "kp+" then
+		cam:setScale(cam:getScale() + 0.1)
+	elseif key == "kp-" then
+		cam:setScale(cam:getScale() - 0.1)
+	end
 end
 
 function preDrawLights()
 	love.graphics.setCanvas({ lightCanvas, stencil = true})
 	love.graphics.clear(0.0, 0.0, 0.0) -- Global illumination level
 	local tX, tY = cam:getPosition()
-	tX = tX - 320
-	tY = tY - 180
+	local scale = cam:getScale()
+	tX = tX * scale - 320
+	tY = tY * scale - 180
 	love.graphics.translate(-tX, -tY)
+	love.graphics.scale(scale)
 	lightWorld:drawLights()
 	love.graphics.setCanvas()
 	love.graphics.reset()
@@ -231,6 +264,7 @@ function spawnEnemies()
 
 			for _ = 1, love.math.random(1, 2) do
 				table.insert(Enemies, smallEnemy:new(j.renderX + j.tileSize * 2 + love.math.random(j.w - j.tileSize * 4), j.renderY + j.tileSize * 2 + love.math.random(j.h - j.tileSize * 4)))
+				Enemies[#Enemies]:update(0)
 			end
 		end
 	end
@@ -242,7 +276,7 @@ function getEntitiesToRender(excudePlayer)
 	if not excudePlayer then table.insert(entities, Player) end
 
 	for i, j in ipairs(Enemies) do
-		if lume.distance(j.x, j.y, Player.x, Player.y) < 320 then
+		if j.currentRoom.visible then
 			table.insert(entities, j)
 		end
 	end

@@ -31,9 +31,12 @@ function player:new(_x, _y)
 	self.maxHealth = 100
 	self.power = 50
 	self.moveSpeed = 20
+	self.invicible = false
 
 	self.state = "idle"
 	self.direction = 1
+
+	self.currentRoom = nil
 
 	self.sword = {
 		image = love.graphics.newImage("gfx/sword.png"),
@@ -60,6 +63,7 @@ function player:new(_x, _y)
 	function self:update(dt)
 		if self.state ~= "dashing" then self.state = "idle" end
 		self.timer:update(dt)
+		self:getCurrentRoom()
 
 		if self.state ~= "dashing" then
 			if love.keyboard.isDown("w") then
@@ -93,6 +97,19 @@ function player:new(_x, _y)
 			j.lifetime = j.lifetime - dt
 
 			if j.lifetime <= 0 then table.remove(self.dashPositions, i) end
+		end
+
+		if self.footCollider:enter("EnemyFoot") and not self.invicible and self.state ~= "dashing" then
+			local collision_data = self.footCollider:getEnterCollisionData('EnemyFoot')
+    		local enemy = collision_data.collider:getObject()
+
+			angle = lume.angle(self.x, self.y, enemy.x, enemy.y)
+			self.health = self.health - 10
+			self.invicible = true
+
+			self.timer:after(0.5, function () self.invicible = false end)
+
+			self.footCollider:applyLinearImpulse(math.cos(angle) * -5, math.sin(angle) * -5)
 		end
 
 		lightWorld:updateLight(self.light, self.x, self.y)
@@ -148,14 +165,14 @@ function player:new(_x, _y)
 				self.timer:tween(0.05, self.sword, {angle = 0.15 * math.pi, xOffset = 5, yOffset = 2}, "in-linear")
 			end)
 
-			self.timer:after(0.13, function() self.canAttack = true end)
+			self.timer:after(0.2, function() self.canAttack = true end)
 
 			local colliders = world:queryRectangleArea(self.x + math.min(self.direction, 0) * 21, self.y - 8, 21, 18, {"EnemyFoot"})
 			for _, collider in ipairs(colliders) do
 				angle = lume.angle(self.x, self.y, collider:getX(), collider:getY())
 				collider:applyLinearImpulse(math.cos(angle) * 15, math.sin(angle) * 15)
 				local enemy = collider:getObject()
-				enemy.health = enemy.health - 40
+				enemy:takeDamage(self.power)
 			end
 		end
 	end
@@ -171,6 +188,13 @@ function player:new(_x, _y)
 		self.animations[self.state]:draw(animationImage, self.x, self.y, 0, self.direction, 1, 8, 24)
 
 		--love.graphics.rectangle("line", self.x + math.min(self.direction, 0) * 21, self.y - 8, 21, 18)
+	end
+
+	function self:getCurrentRoom()
+		local RoomHorizontalIndex = math.ceil(self.x / (Maze.roomSize * Maze.tileSize))
+		local RoomVerticalIndex = math.floor(self.y / (Maze.roomSize * Maze.tileSize))
+		self.currentRoom = Maze.rooms[RoomVerticalIndex * Maze.width + RoomHorizontalIndex]
+		--print(RoomHorizontalIndex, RoomVerticalIndex)
 	end
 
 	return self

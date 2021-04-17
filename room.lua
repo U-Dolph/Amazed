@@ -1,7 +1,8 @@
 local room = {}
 
-function room:new(_x, _y, _tileSize, _roomSize)
+function room:new(_x, _y, _tileSize, _roomSize, parentMaze)
 	local self = {}
+	self.parent = parentMaze
 
 	self.x = _x
 	self.y = _y
@@ -14,7 +15,7 @@ function room:new(_x, _y, _tileSize, _roomSize)
 	self.renderY = self.y * self.h
 
 	self.visited = false
-	self.previsited = love.math.noise(self.x / 10 + Maze.noiseOffsetX, self.y / 10 + Maze.noiseOffsetY) > 0.85
+	self.previsited = love.math.noise(self.x / 10 +self.parent.noiseOffsetX, self.y / 10 +self.parent.noiseOffsetY) > 0.85
 	self.path = {0, 0, 0, 0}
 	self.isNode = true
 	self.node = nil
@@ -23,6 +24,7 @@ function room:new(_x, _y, _tileSize, _roomSize)
 	self.colliders = {}
 
 	self.explored = false
+	self.visible = false
 
 	function self:render()
 		if self.visited then
@@ -36,7 +38,7 @@ function room:new(_x, _y, _tileSize, _roomSize)
 				love.graphics.setColor(1,1,1,1)
 			end
 
-			--[[if self.isNode and self.node == Maze.endNode then
+			--[[if self.isNode and self.node ==self.parent.endNode then
 				love.graphics.setColor(1, 0, 0, 0.2)
 				love.graphics.rectangle("fill", self.renderX, self.renderY, self.w, self.h)
 				love.graphics.setColor(1,1,1,1)
@@ -80,7 +82,7 @@ function room:new(_x, _y, _tileSize, _roomSize)
 					end
 
 					--?Place the exit if needed
-					if self.isNode and self.node == Maze.endNode then
+					if self.isNode and self.node == self.parent.endNode then
 						if x == self.size / 2 - 1 then self.tilemap[#self.tilemap].floorImage = exitImages[1]
 						elseif x == self.size / 2 then self.tilemap[#self.tilemap].floorImage = exitImages[2] end
 					end
@@ -120,10 +122,10 @@ function room:new(_x, _y, _tileSize, _roomSize)
 
 				--*CORNER CHECKING
 				local neighbours = {
-					Maze.rooms[Maze:getIndex(1, -1, self)], --NE-neighbour
-					Maze.rooms[Maze:getIndex(1, 1, self)], --SE-neighbour
-					Maze.rooms[Maze:getIndex(-1, 1, self)], --SW-neighbour
-					Maze.rooms[Maze:getIndex(-1, -1, self)], --NW-neighbour
+					self.parent.rooms[self.parent:getIndex(1, -1, self)], --NE-neighbour
+					self.parent.rooms[self.parent:getIndex(1, 1, self)], --SE-neighbour
+					self.parent.rooms[self.parent:getIndex(-1, 1, self)], --SW-neighbour
+					self.parent.rooms[self.parent:getIndex(-1, -1, self)], --NW-neighbour
 				}
 
 				--Top of the walls
@@ -285,10 +287,10 @@ function room:new(_x, _y, _tileSize, _roomSize)
 
 	function self:createShadowboxes()
 		local neighbours = {
-			Maze.rooms[Maze:getIndex(1, -1, self)], --NE-neighbour
-			Maze.rooms[Maze:getIndex(1, 1, self)], --SE-neighbour
-			Maze.rooms[Maze:getIndex(-1, 1, self)], --SW-neighbour
-			Maze.rooms[Maze:getIndex(-1, -1, self)], --NW-neighbour
+			self.parent.rooms[self.parent:getIndex(1, -1, self)], --NE-neighbour
+			self.parent.rooms[self.parent:getIndex(1, 1, self)], --SE-neighbour
+			self.parent.rooms[self.parent:getIndex(-1, 1, self)], --SW-neighbour
+			self.parent.rooms[self.parent:getIndex(-1, -1, self)], --NW-neighbour
 		}
 
 		local widthModifier = {0, 0}
