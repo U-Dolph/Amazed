@@ -115,12 +115,12 @@ function player:new()
 		lightWorld:updateLight(self.light, self.x, self.y)
 	end
 
-	function self:getKeypress(_key)
+	function self:dash()
 		local mx, my = love.mouse.getPosition()
-		mx, my = cam:toWorld(mx / renderScale, my / renderScale)
+		mx, my = playerCam:toWorld(mx / renderScale, my / renderScale)
 		local angle = math.atan2(my - self.y, mx - self.x)
 
-		if _key == "space" and self.canDash then
+		if self.canDash then
 			self.footCollider:applyLinearImpulse(math.cos(angle) * 15, math.sin(angle) * 15)
 
 			table.insert(self.dashPositions, {x = self.x, y = self.y, anim = self.smokeAnimation:clone(), lifetime = 0.45})
@@ -141,22 +141,13 @@ function player:new()
 			end)
 
 			self.timer:tween(0.05, self.sword, {angle = 0.5 * math.pi}, "out-cubic")
-
-		elseif _key == "lshift" and self.canDodge then
-			self.footCollider:setLinearVelocity(0, 0)
-			self.footCollider:applyLinearImpulse(-math.cos(angle) * 7, -math.sin(angle) * 7)
-			table.insert(self.dashPositions, {x = self.x, y = self.y, anim = self.smokeAnimation:clone(), lifetime = 0.45, scale = 0.25})
-			self.canDodge = false
-			self.timer:after(0.5, function() self.canDodge = true end)
-
-			self.direction = mx > self.x and 1 or -1
 		end
 	end
 
-	function self:getMousepresses(_x, _y, _button)
-		_x, _y = cam:toWorld(_x / renderScale, _y / renderScale)
+	function self:attack(_x, _y)
+		_x, _y = playerCam:toWorld(_x / renderScale, _y / renderScale)
 
-		if _button == 1 and self.canAttack then
+		if self.canAttack then
 			self.direction = _x > self.x and 1 or -1
 			self.canAttack = false
 			self.sword.isDownSwinging = true
@@ -167,7 +158,7 @@ function player:new()
 
 			self.timer:after(0.2, function() self.canAttack = true end)
 
-			local colliders = world:queryRectangleArea(self.x + math.min(self.direction, 0) * 21, self.y - 8, 21, 18, {"EnemyFoot"})
+			local colliders = World:queryRectangleArea(self.x + math.min(self.direction, 0) * 21, self.y - 8, 21, 18, {"EnemyFoot"})
 			for _, collider in ipairs(colliders) do
 				angle = lume.angle(self.x, self.y, collider:getX(), collider:getY())
 				collider:applyLinearImpulse(math.cos(angle) * 15, math.sin(angle) * 15)
@@ -200,6 +191,9 @@ function player:new()
 	function self:setPosition(_x, _y)
 		self.x = _x
 		self.y = _y
+
+		self.footCollider:setPosition(self.x, self.y)
+		--self.footCollider = World:newRectangleCollider(self.x - 6, self.y + 6, 12, 3)
 	end
 
 	return self

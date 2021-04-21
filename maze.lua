@@ -274,7 +274,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 				end
 			end
 		else
-			local roomsToRender = self:depthSearch(Player.currentRoom, _ROOMDEPTH)
+			local roomsToRender = self:depthSearch(player.currentRoom, _ROOMDEPTH)
 
 			for _, j in ipairs(self.rooms) do
 				j.visible = false
@@ -372,8 +372,8 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 				if l == j then valid = false end
 			end
 
-			local xLeft, yTop = cam:toScreen(j.renderX, j.renderY)
-			local xRight, yBottom = cam:toScreen(j.renderX + j.w, j.renderY + j.h)
+			local xLeft, yTop = playerCam:toScreen(j.renderX, j.renderY)
+			local xRight, yBottom = playerCam:toScreen(j.renderX + j.w, j.renderY + j.h)
 
 			if valid and xRight > 0 and xLeft < 640 and yBottom > 0 and yTop < 360 then
 				table.insert(result, j)

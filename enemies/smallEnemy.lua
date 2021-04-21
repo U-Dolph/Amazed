@@ -1,7 +1,7 @@
 local smallEnemy = {}
 
 function smallEnemy:new(_x, _y)
-	local self = enemy:new(_x, _y)
+	local self = Enemy:new(_x, _y)
 
 	local grid = anim8.newGrid(16, 16, animationImage:getWidth(), animationImage:getHeight())
 	local explosionGrid = anim8.newGrid(16, 16, smallExplosionImage:getWidth(), smallExplosionImage:getHeight())
@@ -25,7 +25,7 @@ function smallEnemy:new(_x, _y)
 	end)
 
 	function self:update(dt)
-		local xCoord, yCoord = cam:toScreen(self.x, self.y)
+		local xCoord, yCoord = player:toScreen(self.x, self.y)
 
 		self.timer:update(dt)
 		self.animations[self.state]:update(dt)
@@ -80,13 +80,13 @@ function smallEnemy:new(_x, _y)
 	end
 
 	function self:createCollider()
-		self.footCollider = world:newRectangleCollider(self.x - 6, self.y + 4.5, 12, 3)
+		self.footCollider = World:newRectangleCollider(self.x - 6, self.y + 4.5, 12, 3)
 		self.footCollider:setLinearDamping(5)
 		self.footCollider:setFixedRotation(true)
 		self.footCollider:setCollisionClass("EnemyFoot")
 		self.footCollider:setObject(self)
 
-		self.bodyCollider = world:newRectangleCollider(self.x, self.y - 5, 12, 11)
+		self.bodyCollider = World:newRectangleCollider(self.x, self.y - 5, 12, 11)
 		self.bodyCollider:setFixedRotation(true)
 		self.bodyCollider:setCollisionClass("EnemyBody")
 		self.bodyCollider:setObject(self)

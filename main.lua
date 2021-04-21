@@ -47,7 +47,7 @@ function love.load()
 	player = Player:new()
 	hud = HUD:new()
 
-	Gamestate.registerEvents{'keypressed'}
+	Gamestate.registerEvents{'keypressed', 'mousepressed'}
 	Gamestate.switch(menu)
 
 	canvas = love.graphics.newCanvas(640, 360)
@@ -63,11 +63,6 @@ function love.update(dt)
 	lurker.update()
 	Gamestate.update(dt)
 	--[[
-	world:update(dt)
-	Maze:update(dt)
-	Player:update(dt)
-	cam:setPosition(Player.x, Player.y)
-
 	local entities = getEntitiesToRender(true)
 
 	for i, j in ipairs(Enemies) do
@@ -95,21 +90,6 @@ function love.draw()
 	love.graphics.setCanvas({canvas, stencil = true})
 		love.graphics.clear()
 		Gamestate.draw()
-
-		--[[cam:draw(function(l,t,w,h)
-			roomsRendered = Maze:render()
-			--Player:render()
-			for i, j in ipairs(entities) do
-				j:render()
-			end
-			if doDrawColliders then world:draw() end
-		end)
-
-		love.graphics.setBlendMode("multiply", "premultiplied")
-		if doDrawLight then love.graphics.draw(lightCanvas) end
-		love.graphics.setBlendMode("alpha")
-
-		hud:render()]]
 	love.graphics.reset()
 
 	love.graphics.draw(canvas, math.floor(love.graphics.getWidth()/2), math.floor(love.graphics.getHeight()/2), 0, renderScale, renderScale, math.floor(canvas:getWidth()/2), math.floor(canvas:getHeight()/2))
@@ -164,17 +144,17 @@ function love.keypressed(key)
 
 	--*FOR DEBUG ONLY*--
 	if key == "kp+" then
-		cam:setScale(cam:getScale() + 0.1)
+		playerCam:setScale(playerCam:getScale() + 0.1)
 	elseif key == "kp-" then
-		cam:setScale(cam:getScale() - 0.1)
+		playerCam:setScale(playerCam:getScale() - 0.1)
 	end
 end
 
 function preDrawLights()
 	love.graphics.setCanvas({ lightCanvas, stencil = true})
 	love.graphics.clear(0.0, 0.0, 0.0) -- Global illumination level
-	local tX, tY = cam:getPosition()
-	local scale = cam:getScale()
+	local tX, tY = playerCam:getPosition()
+	local scale = playerCam:getScale()
 	tX = tX * scale - 320
 	tY = tY * scale - 180
 	love.graphics.translate(-tX, -tY)
@@ -247,29 +227,13 @@ function loadSpritesheet()
 end
 
 function spawnEnemies()
-	for _, j in ipairs(Maze.rooms) do
+	for _, j in ipairs(maze.rooms) do
 		if love.math.random() > 0.5 and j.isNode then
 
 			for _ = 1, love.math.random(1, 2) do
-				table.insert(Enemies, smallEnemy:new(j.renderX + j.tileSize * 2 + love.math.random(j.w - j.tileSize * 4), j.renderY + j.tileSize * 2 + love.math.random(j.h - j.tileSize * 4)))
-				Enemies[#Enemies]:update(0)
+				--table.insert(Enemies, smallEnemy:new(j.renderX + j.tileSize * 2 + love.math.random(j.w - j.tileSize * 4), j.renderY + j.tileSize * 2 + love.math.random(j.h - j.tileSize * 4)))
+				--Enemies[#Enemies]:update(0)
 			end
 		end
 	end
-end
-
-function getEntitiesToRender(excudePlayer)
-	local entities = {}
-
-	if not excudePlayer then table.insert(entities, Player) end
-
-	for i, j in ipairs(Enemies) do
-		if j.currentRoom.visible then
-			table.insert(entities, j)
-		end
-	end
-
-	table.sort(entities, function(a, b) return a.y < b.y end)
-
-	return entities
 end

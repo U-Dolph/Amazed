@@ -47,7 +47,7 @@ function enemy:new(_x, _y)
 
 	function self:findPath(destination)
 		if self.health > 0 then
-		for _, j in ipairs(Maze.rooms) do
+		for _, j in ipairs(maze.rooms) do
 			if j.isNode then
 				j.node:resetNode()
 			end
@@ -116,9 +116,9 @@ function enemy:new(_x, _y)
 	end
 
 	function self:getCurrentRoom()
-		local RoomHorizontalIndex = math.ceil(self.x / (Maze.roomSize * Maze.tileSize))
-		local RoomVerticalIndex = math.floor(self.y / (Maze.roomSize * Maze.tileSize))
-		return Maze.rooms[RoomVerticalIndex * Maze.width + RoomHorizontalIndex]
+		local RoomHorizontalIndex = math.ceil(self.x / (maze.roomSize * maze.tileSize))
+		local RoomVerticalIndex = math.floor(self.y / (maze.roomSize * maze.tileSize))
+		return maze.rooms[RoomVerticalIndex * maze.width + RoomHorizontalIndex]
 	end
 
 	return self
