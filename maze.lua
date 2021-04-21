@@ -167,7 +167,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 
 				--!Don't want shadows in the menu
 				if not isMenuState then
-					j:createShadowboxes()
+					j:createShadowboxes(lightWorld)
 				end
 			end
 		end
@@ -268,7 +268,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 	function self:render()
 		if Gamestate.current() == menu then
 			for _, j in ipairs(self.rooms) do
-				local left, top, _, _, right, bottom = menu.cam:getVisibleCorners()
+				local left, top, _, _, right, bottom = playerCam:getVisibleCorners()
 				if j.renderX + j.w >= left and j.renderX <= right and j.renderY + j.h >= top and j.renderY <= bottom then
 					j:render()
 				end
@@ -291,10 +291,10 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 
 	function self:update(dt)
 		for _, j in ipairs(self.rooms) do
-			local xLeft, yTop = cam:toScreen(j.renderX, j.renderY)
-			local xRight, yBottom = cam:toScreen(j.renderX + j.w, j.renderY + j.h)
+			local xLeft, yTop = playerCam:toScreen(j.renderX, j.renderY)
+			local xRight, yBottom = playerCam:toScreen(j.renderX + j.w, j.renderY + j.h)
 
-			if Player.x >= j.renderX and Player.x <= j.renderX + j.w and Player.y >= j.renderY and Player.y <= j.renderY + j.h then
+			if player.x >= j.renderX and player.x <= j.renderX + j.w and player.y >= j.renderY and player.y <= j.renderY + j.h then
 				if j.path[1] == 1 then self.rooms[self:getIndex(0, -1, j)].explored = true end
 				if j.path[2] == 1 then self.rooms[self:getIndex(1, 0, j)].explored = true end
 				if j.path[3] == 1 then self.rooms[self:getIndex(0, 1, j)].explored = true end
@@ -304,7 +304,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 
 			if xRight > 0 and xLeft < 640 and yBottom > 0 and yTop < 360 then
 				if #j.colliders == 0 and j.visited then
-					j:createColliders()
+					j:createColliders(World, self)
 				end
 			else
 				for k, l in ipairs(j.colliders) do

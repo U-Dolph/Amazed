@@ -187,9 +187,9 @@ function room:new(_x, _y, _tileSize, _roomSize, parentMaze)
 		end
 	end
 
-	function self:createColliders()
+	function self:createColliders(_world, _maze)
 		if self.path[1] == 0 then
-			table.insert(self.colliders, world:newChainCollider(false, {
+			table.insert(self.colliders, _world:newChainCollider(false, {
 				self.renderX, self.renderY,
 				self.renderX, self.renderY + self.tileSize,
 				self.renderX + self.w, self.renderY + self.tileSize,
@@ -200,7 +200,7 @@ function room:new(_x, _y, _tileSize, _roomSize, parentMaze)
 		end
 
 		if self.path[3] == 0 then
-			table.insert(self.colliders, world:newChainCollider(false, {
+			table.insert(self.colliders, _world:newChainCollider(false, {
 				self.renderX, self.renderY + self.h,
 				self.renderX, self.renderY + self.h - self.tileSize,
 				self.renderX + self.w, self.renderY + self.h - self.tileSize,
@@ -211,7 +211,7 @@ function room:new(_x, _y, _tileSize, _roomSize, parentMaze)
 		end
 
 		if self.path[2] == 0 then
-			table.insert(self.colliders, world:newChainCollider(false, {
+			table.insert(self.colliders, _world:newChainCollider(false, {
 				self.renderX + self.w, self.renderY,
 				self.renderX + self.w - self.tileSize, self.renderY,
 				self.renderX + self.w - self.tileSize, self.renderY + self.h,
@@ -222,7 +222,7 @@ function room:new(_x, _y, _tileSize, _roomSize, parentMaze)
 		end
 
 		if self.path[4] == 0 then
-			table.insert(self.colliders, world:newChainCollider(false, {
+			table.insert(self.colliders, _world:newChainCollider(false, {
 				self.renderX, self.renderY,
 				self.renderX + self.tileSize, self.renderY,
 				self.renderX + self.tileSize, self.renderY + self.h,
@@ -234,15 +234,15 @@ function room:new(_x, _y, _tileSize, _roomSize, parentMaze)
 
 		--*Missing corner hitboxes
 		local neighbours = {
-			Maze.rooms[Maze:getIndex(1, -1, self)], --NE-neighbour
-			Maze.rooms[Maze:getIndex(1, 1, self)], --SE-neighbour
-			Maze.rooms[Maze:getIndex(-1, 1, self)], --SW-neighbour
-			Maze.rooms[Maze:getIndex(-1, -1, self)], --NW-neighbour
+			_maze.rooms[_maze:getIndex(1, -1, self)], --NE-neighbour
+			_maze.rooms[_maze:getIndex(1, 1, self)], --SE-neighbour
+			_maze.rooms[_maze:getIndex(-1, 1, self)], --SW-neighbour
+			_maze.rooms[_maze:getIndex(-1, -1, self)], --NW-neighbour
 		}
 
 		--?Top Right
 		if self.path[1] == 1 and self.path[2] == 1 and neighbours[1] and neighbours[1].path[4] == 0 and neighbours[1].path[3] == 0 then
-			table.insert(self.colliders, world:newChainCollider(false, {
+			table.insert(self.colliders, _world:newChainCollider(false, {
 				self.renderX + self.w - self.tileSize, self.renderY,
 				self.renderX + self.w - self.tileSize, self.renderY + self.tileSize,
 				self.renderX + self.w, self.renderY + self.tileSize
@@ -253,7 +253,7 @@ function room:new(_x, _y, _tileSize, _roomSize, parentMaze)
 
 		--?Bottom Right
 		if self.path[2] == 1 and self.path[3] == 1 and neighbours[2] and neighbours[2].path[1] == 0 and neighbours[2].path[4] == 0 then
-			table.insert(self.colliders, world:newChainCollider(false, {
+			table.insert(self.colliders, _world:newChainCollider(false, {
 				self.renderX + self.w - self.tileSize, self.renderY + self.h,
 				self.renderX + self.w - self.tileSize, self.renderY + self.h - self.tileSize,
 				self.renderX + self.w, self.renderY + self.h - self.tileSize
@@ -264,7 +264,7 @@ function room:new(_x, _y, _tileSize, _roomSize, parentMaze)
 
 		--?Bottom Left
 		if self.path[3] == 1 and self.path[4] == 1 and neighbours[3] and neighbours[3].path[1] == 0 and neighbours[3].path[2] == 0 then
-			table.insert(self.colliders, world:newChainCollider(false, {
+			table.insert(self.colliders, _world:newChainCollider(false, {
 				self.renderX, self.renderY + self.h - self.tileSize,
 				self.renderX + self.tileSize, self.renderY + self.h - self.tileSize,
 				self.renderX + self.tileSize, self.renderY + self.h
@@ -275,7 +275,7 @@ function room:new(_x, _y, _tileSize, _roomSize, parentMaze)
 
 		--?Top Left
 		if self.path[4] == 1 and self.path[1] == 1 and neighbours[4] and neighbours[4].path[2] == 0 and neighbours[4].path[3] == 0 then
-			table.insert(self.colliders, world:newChainCollider(false, {
+			table.insert(self.colliders, _world:newChainCollider(false, {
 				self.renderX + self.tileSize, self.renderY,
 				self.renderX + self.tileSize, self.renderY + self.tileSize,
 				self.renderX, self.renderY + self.tileSize

@@ -1,10 +1,10 @@
 local player = {}
 
-function player:new(_x, _y)
+function player:new()
 	local self = {}
 
-	self.x = _x
-	self.y = _y
+	self.x = 0
+	self.y = 0
 
 	local grid 		= anim8.newGrid(16, 32, animationImage:getWidth(), animationImage:getHeight())
 	local smokeGrid = anim8.newGrid(32, 32, smokeImage:getWidth(), smokeImage:getHeight())
@@ -52,7 +52,7 @@ function player:new(_x, _y)
 		}
 	}
 
-	self.footCollider = world:newRectangleCollider(self.x - 6, self.y + 6, 12, 3)
+	self.footCollider = World:newRectangleCollider(self.x - 6, self.y + 6, 12, 3)
 	self.footCollider:setLinearDamping(5)
 	self.footCollider:setFixedRotation(true)
 	self.footCollider:setMass(self.footCollider:getMass() / 3)
@@ -190,11 +190,16 @@ function player:new(_x, _y)
 		--love.graphics.rectangle("line", self.x + math.min(self.direction, 0) * 21, self.y - 8, 21, 18)
 	end
 
-	function self:getCurrentRoom()
-		local RoomHorizontalIndex = math.ceil(self.x / (Maze.roomSize * Maze.tileSize))
-		local RoomVerticalIndex = math.floor(self.y / (Maze.roomSize * Maze.tileSize))
-		self.currentRoom = Maze.rooms[RoomVerticalIndex * Maze.width + RoomHorizontalIndex]
+	function self:getCurrentRoom(_maze)
+		local RoomHorizontalIndex = math.ceil(self.x / (maze.roomSize * maze.tileSize))
+		local RoomVerticalIndex = math.floor(self.y / (maze.roomSize * maze.tileSize))
+		self.currentRoom = maze.rooms[RoomVerticalIndex * maze.width + RoomHorizontalIndex]
 		--print(RoomHorizontalIndex, RoomVerticalIndex)
+	end
+
+	function self:setPosition(_x, _y)
+		self.x = _x
+		self.y = _y
 	end
 
 	return self

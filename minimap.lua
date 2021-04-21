@@ -1,6 +1,6 @@
 local minimap = {}
 
-function minimap:new(_x, _y, _w, _h, _horizontalSize, _verticalSize)
+function minimap:new(_x, _y, _w, _h)
 	local self = {}
 
 	self.x = _x
@@ -9,17 +9,17 @@ function minimap:new(_x, _y, _w, _h, _horizontalSize, _verticalSize)
 	self.width = _w
 	self.height = _h
 
-	self.roomSize = Maze.roomSize
+	self.roomSize = maze.roomSize
 
-	self.roomsHorizontal = mazeWidth
-	self.roomsVertical = mazeHeight
+	self.roomsHorizontal = maze.width
+	self.roomsVertical = maze.height
 
 	self.frame = love.graphics.newImage("gfx/minimapFrame.png")
 	self.background = love.graphics.newImage("gfx/mapBackground.png")
 
 	function self:render()
-		local normalizedPlayerX = Player.x / (self.roomSize * self.roomsHorizontal * Maze.tileSize)
-		local normalizedPlayerY = Player.y / (self.roomSize * self.roomsVertical * Maze.tileSize)
+		local normalizedPlayerX = player.x / (self.roomSize * self.roomsHorizontal * maze.tileSize)
+		local normalizedPlayerY = player.y / (self.roomSize * self.roomsVertical * maze.tileSize)
 		local diffHorizontal = (self.roomSize * self.roomsHorizontal) - self.width + 20
 		local diffVertical = (self.roomSize * self.roomsVertical) - self.height + 20
 		love.graphics.draw(self.background, self.x, self.y)
@@ -29,10 +29,10 @@ function minimap:new(_x, _y, _w, _h, _horizontalSize, _verticalSize)
 
 		love.graphics.setScissor(self.x + 6, self.y + 6, self.width, self.height)
 
-		for _, j in ipairs(Maze.rooms) do
+		for _, j in ipairs(maze.rooms) do
 			if j.explored then
 				love.graphics.setColor(0, 0, 0, 0.3)
-				if j.node == Maze.endNode then love.graphics.setColor(0.5, 0.5, 1, 0.3) end
+				if j.node == maze.endNode then love.graphics.setColor(0.5, 0.5, 1, 0.3) end
 
 				love.graphics.rectangle("fill", self.x + 6 + j.x * self.roomSize, self.y + 6 + j.y * self.roomSize, self.roomSize, self.roomSize)
 				love.graphics.setColor(110/255, 74/255, 72/255)
@@ -56,8 +56,8 @@ function minimap:new(_x, _y, _w, _h, _horizontalSize, _verticalSize)
 			end
 		end
 
-		local playerTileX = math.ceil(Player.x / Maze.tileSize)
-		local playerTileY = math.ceil((Player.y + 6) / Maze.tileSize)
+		local playerTileX = math.ceil(player.x / maze.tileSize)
+		local playerTileY = math.ceil((player.y + 6) / maze.tileSize)
 
 		love.graphics.setColor(0, 1, 0)
 		love.graphics.points(self.x + 6 + playerTileX, self.y + 6 + playerTileY)

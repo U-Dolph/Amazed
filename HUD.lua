@@ -5,7 +5,7 @@ function HUD:new()
 
 	self.timer = Timer.new()
 
-	self.minimap = minimap:new(518, 10, 100, 100)
+	self.minimap = Minimap:new(518, 10, 100, 100)
 
 	self.healthbar = {
 		frameImage = love.graphics.newImage("gfx/healthbar2.png"),
@@ -18,7 +18,7 @@ function HUD:new()
 	function self:render()
 		self.minimap:render()
 
-		love.graphics.setScissor(self.healthbar.x, self.healthbar.y + 1, self.healthbar.fillImage:getWidth() * Player.health / Player.maxHealth, 8)
+		love.graphics.setScissor(self.healthbar.x, self.healthbar.y + 1, self.healthbar.fillImage:getWidth() * player.health / player.maxHealth, 8)
 		love.graphics.draw(self.healthbar.fillImage, self.healthbar.x, self.healthbar.y + 1)
 		love.graphics.setScissor()
 

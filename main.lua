@@ -1,22 +1,23 @@
-moonshine = require "lib/moonshine"
-Gamestate 	= require "lib/gamestate"
-lume 		= require "lib/lume"
-lurker 		= require "lib/lurker"
-Timer 		= require "lib/timer"
-Lighter		= require 'lib/lighter'
-windfield 	= require "lib/windfield"
-anim8 		= require "lib/anim8"
-gamera 		= require 'lib/gamera'
+moonshine 	= require "lib.moonshine"
+Gamestate 	= require "lib.gamestate"
+lume 		= require "lib.lume"
+lurker 		= require "lib.lurker"
+Timer 		= require "lib.timer"
+Lighter		= require 'lib.lighter'
+windfield 	= require "lib.windfield"
+anim8 		= require "lib.anim8"
+gamera 		= require 'lib.gamera'
 
-player 		= require "player"
-maze 		= require "maze"
-minimap 	= require "minimap"
+Player 		= require "player"
+MazeGen 	= require "maze"
+Minimap 	= require "minimap"
 HUD 		= require "HUD"
-enemy 		= require "enemy"
-smallEnemy 	= require "enemies/smallEnemy"
+Enemy 		= require "enemies.enemy"
+SmallEnemy 	= require "enemies.smallEnemy"
 
 --*GAMESTATES*--
-require "gamestates/menu"
+require "gamestates.menu"
+require "gamestates.game"
 
 mazeWidth = 20
 mazeHeight = 20
@@ -29,40 +30,31 @@ function love.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	loadSpritesheet()
 
+	World = windfield.newWorld(0, 0, true)
+	World:addCollisionClass('Wall', {ignores = {'Wall'}})
+	World:addCollisionClass('EnemyFoot')
+	World:addCollisionClass('PlayerFoot')
+	World:addCollisionClass('EnemyBody', {ignores = {'Wall', 'EnemyFoot', 'EnemyBody', 'PlayerFoot'}})
+
+	lightWorld  = Lighter()
+	lightCanvas = love.graphics.newCanvas(640, 360)
+
+	playerCam = gamera.new(-320, -180, mazeWidth * 16 * 8 + 640, mazeHeight * 16 * 8 + 360)
+	playerCam:setWindow(0, 0, 640, 360)
+
+	maze = MazeGen:new(mazeWidth, mazeHeight, 16, 8)
+
+	player = Player:new()
+	hud = HUD:new()
+
 	Gamestate.registerEvents{'keypressed'}
 	Gamestate.switch(menu)
 
 	canvas = love.graphics.newCanvas(640, 360)
 
 	--[[
-	cursor = love.mouse.newCursor( "gfx/cursor.png", 11, 11)
-	love.mouse.setCursor(cursor)
-
-	world = windfield.newWorld(0, 0, true)
-	world:addCollisionClass('Wall', {ignores = {'Wall'}})
-	world:addCollisionClass('EnemyFoot')
-	world:addCollisionClass('PlayerFoot')
-	world:addCollisionClass('EnemyBody', {ignores = {'Wall', 'EnemyFoot', 'EnemyBody', 'PlayerFoot'}})
-
-	lightWorld = Lighter()
-
-	cam = gamera.new(-320, -180, mazeWidth * 16 * 8 + 640, mazeHeight * 16 * 8 + 360)
-	cam:setWindow(0, 0, 640, 360)
-
-	Maze = maze:new(mazeWidth, mazeHeight, 16, 8)
-	Maze:createMaze()
-
-	Player = player:new(Maze.startNode.renderX, Maze.startNode.renderY)
-
-	hud = HUD:new()
-
-	
-	lightCanvas = love.graphics.newCanvas(640, 360)
-
 	doDrawColliders = false
 	doDrawLight = true
-
-	Enemies = {}
 	spawnEnemies()
 	]]
 end
@@ -144,10 +136,6 @@ end
 
 function love.keypressed(key)
 	--Player:getKeypress(key)
-
-	if key == "escape" then
-		love.event.quit()
-	end
 
 	if key == "f5" then
 		love.event.quit("restart")
