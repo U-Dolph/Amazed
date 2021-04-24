@@ -168,9 +168,11 @@ function enemy:new(_x, _y)
 	end
 
 	function self:noticePlayer()
-		self.isAttacking = true
-		popupHandler:addElement("?", self.x, self.y - 18, {1, 0.5, 0.5})
 		self.path = self:findPath(player)
+		if #self.path <= 2 then
+			self.isAttacking = true
+			popupHandler:addElement("?", self.x, self.y - 18, {1, 0.5, 0.5})
+		end
 	end
 
 	return self

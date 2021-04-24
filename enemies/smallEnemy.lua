@@ -60,22 +60,19 @@ function smallEnemy:new(_x, _y)
 					self:move()
 				end
 
-				if self.playerPrevKnownRoom ~= player.currentRoom or self.prevKnownRoom ~= self.currentRoom then
-					self.playerPrevKnownRoom = player.currentRoom
-					self.prevKnownRoom = self.currentRoom
-					self.path = self:findPath(player)
-				end
+				
 
 				if self.isAttacking then
 					self.direction = player.x > self.x and 1 or -1
 
+					if self.playerPrevKnownRoom ~= player.currentRoom or self.prevKnownRoom ~= self.currentRoom then
+						self.playerPrevKnownRoom = player.currentRoom
+						self.prevKnownRoom = self.currentRoom
+						self.path = self:findPath(player)
+					end
+
 					if lume.distance(self.x, self.y, player.x, player.y) < 50 then
 						if self.canAttack then self:attack() end
-					else
-						--self.canAttack = true
-						--self.canMove = true
-
-						--if self.attackHandler then self.timer:cancel(self.attackHandler) end
 					end
 				end
 
