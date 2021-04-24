@@ -8,6 +8,7 @@ function player:new()
 
 	local grid 		= anim8.newGrid(16, 32, animationImage:getWidth(), animationImage:getHeight())
 	local smokeGrid = anim8.newGrid(32, 32, smokeImage:getWidth(), smokeImage:getHeight())
+	local swingGrid = anim8.newGrid(64, 64, swingImage:getWidth(), swingImage:getHeight())
 
 	self.animations = {
 		["idle"] = anim8.newAnimation(grid('9-12', 4), 0.10),
@@ -16,8 +17,10 @@ function player:new()
 	}
 
 	self.smokeAnimation = anim8.newAnimation(smokeGrid('1-9', 1), 0.05, 'pauseAtEnd')
+	self.swingAnimation = anim8.newAnimation(swingGrid('1-10', 1), 0.02, 'pauseAtEnd')
 
 	self.dashPositions = {}
+	self.swingPositions = {}
 
 	self.timer = Timer.new()
 
@@ -32,6 +35,7 @@ function player:new()
 	self.power = 50
 	self.moveSpeed = 20
 	self.invicible = false
+	self.defense = 20
 
 	self.state = "idle"
 	self.direction = 1
@@ -99,7 +103,23 @@ function player:new()
 			if j.lifetime <= 0 then table.remove(self.dashPositions, i) end
 		end
 
-		if self.footCollider:enter("EnemyFoot") and not self.invicible and self.state ~= "dashing" then
+		for i, j in ipairs(self.swingPositions) do
+			j.anim:update(dt)
+			j.lifetime = j.lifetime - dt
+
+			if j.lifetime <= 0 then table.remove(self.swingPositions, i) end
+		end
+
+		local mx, my = love.mouse.getPosition()
+		mx, my = playerCam:toWorld(mx / renderScale, my / renderScale)
+
+		if not self.sword.isDownSwinging then
+			self.sword.angle = lume.angle(self.x, self.y, mx, my) - math.pi / 2
+		end
+		self.sword.yOffset = math.sin(self.sword.angle - math.pi / 2) * 5 + 2
+		self.sword.xOffset = math.cos(self.sword.angle - math.pi / 2) * 5
+
+		--[[if self.footCollider:enter("EnemyFoot") and not self.invicible and self.state ~= "dashing" then
 			local collision_data = self.footCollider:getEnterCollisionData('EnemyFoot')
     		local enemy = collision_data.collider:getObject()
 
@@ -110,7 +130,7 @@ function player:new()
 			self.timer:after(0.5, function () self.invicible = false end)
 
 			self.footCollider:applyLinearImpulse(math.cos(angle) * -5, math.sin(angle) * -5)
-		end
+		end]]
 
 		lightWorld:updateLight(self.light, self.x, self.y)
 	end
@@ -127,7 +147,6 @@ function player:new()
 
 			self.direction = mx > self.x and 1 or -1
 			self.canDash = false
-			self.canAttack = false
 			self.state = "dashing"
 
 			self.animations[self.state]:gotoFrame(1)
@@ -144,27 +163,49 @@ function player:new()
 		end
 	end
 
-	function self:attack(_x, _y)
-		_x, _y = playerCam:toWorld(_x / renderScale, _y / renderScale)
+	function self:attack(mx, my)
+		mx, my = playerCam:toWorld(mx / renderScale, my / renderScale)
+		local _angle = lume.angle(self.x, self.y, mx, my)
 
 		if self.canAttack then
-			self.direction = _x > self.x and 1 or -1
+			self.direction = mx > self.x and 1 or -1
 			self.canAttack = false
+
 			self.sword.isDownSwinging = true
-			self.timer:tween(0.08, self.sword, {angle = 0.5 * math.pi, xOffset = 10, yOffset = 5}, "out-cubic", function()
+
+			self.timer:tween(0.15, self.sword, {angle = _angle + 1 + math.pi / 2}, "out-cubic", function()
 				self.sword.isDownSwinging = false
-				self.timer:tween(0.05, self.sword, {angle = 0.15 * math.pi, xOffset = 5, yOffset = 2}, "in-linear")
+				--self.timer:tween(0.05, self.sword, {angle = 0.15 * math.pi, xOffset = 5, yOffset = 2}, "in-linear")
 			end)
 
 			self.timer:after(0.2, function() self.canAttack = true end)
 
-			local colliders = World:queryRectangleArea(self.x + math.min(self.direction, 0) * 21, self.y - 8, 21, 18, {"EnemyFoot"})
+			table.insert(self.swingPositions, {x = self.x + math.cos(_angle) * 24, y = self.y + math.sin(_angle) * 24, angle = _angle, anim = self.swingAnimation:clone(), lifetime = 0.20})
+
+			local colliders = World:queryCircleArea(self.x + math.cos(_angle) * 24, self.y + math.sin(_angle) * 24, 28, {"EnemyFoot"})
 			for _, collider in ipairs(colliders) do
-				angle = lume.angle(self.x, self.y, collider:getX(), collider:getY())
-				collider:applyLinearImpulse(math.cos(angle) * 15, math.sin(angle) * 15)
+				--angle = lume.angle(self.x, self.y, collider:getX(), collider:getY())
+				--collider:applyLinearImpulse(math.cos(angle) * 15, math.sin(angle) * 15)
 				local enemy = collider:getObject()
+				--enemy.invicible = true
 				enemy:takeDamage(self.power)
+				if not enemy.isAttacking then
+					enemy:noticePlayer()
+				end
 			end
+		end
+	end
+
+	function self:takeDamage(value)
+		if not self.invicible and self.health > 0 then
+			local damage = math.max(1, (value - self.defense) + love.math.random(-4, 4))
+			popupHandler:addElement(damage, self.x, self.y - 18, {1, 0.5, 0})
+			self.health = self.health - damage
+			self.invicible = true
+
+			self.timer:after(0.3, function ()
+				self.invicible = false
+			end)
 		end
 	end
 
@@ -175,13 +216,17 @@ function player:new()
 			j.anim:draw(smokeImage, j.x, j.y, 0, j.scale or 1, j.scale or 1, 16, 16)
 		end
 
-		love.graphics.draw(self.sword.image, self.x + self.sword.xOffset * self.direction, self.y + self.sword.yOffset - self.sword.animationOffsets[self.state][self.currentFrame], self.sword.angle * self.direction, 1, 1, 5, 15)
+		for _, j in ipairs(self.swingPositions) do
+			j.anim:draw(swingImage, j.x, j.y, j.angle, j.scale or 1, j.scale or 1, 32, 32)
+		end
+
+		love.graphics.draw(self.sword.image, self.x + self.sword.xOffset, self.y + self.sword.yOffset - self.sword.animationOffsets[self.state][self.currentFrame], self.sword.angle, 1, 1, 5, 15)
 		self.animations[self.state]:draw(animationImage, self.x, self.y, 0, self.direction, 1, 8, 24)
 
 		--love.graphics.rectangle("line", self.x + math.min(self.direction, 0) * 21, self.y - 8, 21, 18)
 	end
 
-	function self:getCurrentRoom(_maze)
+	function self:getCurrentRoom()
 		local RoomHorizontalIndex = math.ceil(self.x / (maze.roomSize * maze.tileSize))
 		local RoomVerticalIndex = math.floor(self.y / (maze.roomSize * maze.tileSize))
 		self.currentRoom = maze.rooms[RoomVerticalIndex * maze.width + RoomHorizontalIndex]

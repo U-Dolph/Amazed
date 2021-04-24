@@ -18,6 +18,8 @@ SmallEnemy 	= require "enemies.smallEnemy"
 --*GAMESTATES*--
 require "gamestates.menu"
 require "gamestates.game"
+require "enemyFactory"
+require "popupHandler"
 
 mazeWidth = 20
 mazeHeight = 20
@@ -35,6 +37,7 @@ function love.load()
 	World:addCollisionClass('EnemyFoot')
 	World:addCollisionClass('PlayerFoot')
 	World:addCollisionClass('EnemyBody', {ignores = {'Wall', 'EnemyFoot', 'EnemyBody', 'PlayerFoot'}})
+	World:setQueryDebugDrawing(true)
 
 	lightWorld  = Lighter()
 	lightCanvas = love.graphics.newCanvas(640, 360)
@@ -51,42 +54,14 @@ function love.load()
 	Gamestate.switch(menu)
 
 	canvas = love.graphics.newCanvas(640, 360)
-
-	--[[
-	doDrawColliders = false
-	doDrawLight = true
-	spawnEnemies()
-	]]
 end
 
 function love.update(dt)
 	lurker.update()
 	Gamestate.update(dt)
-	--[[
-	local entities = getEntitiesToRender(true)
-
-	for i, j in ipairs(Enemies) do
-		j:update(dt)
-
-		if j.health <= 0 then
-			if j.state ~= "explosion" then
-				j.state = "explosion"
-				j.footCollider:destroy()
-				j.bodyCollider:destroy()
-				j.timer:after(0.8, function() j.alive = false end)
-			end
-		end
-
-		if not j.alive then table.remove(Enemies, i) end
-	end
-
-	preDrawLights()
-	]]
 end
 
 function love.draw()
-	--local roomsRendered = 0
-	--local entities = getEntitiesToRender()
 	love.graphics.setCanvas({canvas, stencil = true})
 		love.graphics.clear()
 		Gamestate.draw()
@@ -95,28 +70,20 @@ function love.draw()
 	love.graphics.draw(canvas, math.floor(love.graphics.getWidth()/2), math.floor(love.graphics.getHeight()/2), 0, renderScale, renderScale, math.floor(canvas:getWidth()/2), math.floor(canvas:getHeight()/2))
 
 	love.graphics.print("FPS:" .. love.timer.getFPS(), 10, 10)
-	--[[love.graphics.print("Body Count: " .. world:getBodyCount( ), 10, 30)
-	love.graphics.print("Rooms rendered: " .. roomsRendered, 10, 50)
-	love.graphics.print("Entities rendered: " .. #entities, 10, 70)
-	love.graphics.print("Render depth: " .. _ROOMDEPTH, 10, 90)
-	]]
+	love.graphics.print("Body Count: " .. World:getBodyCount( ), 10, 30)
+	love.graphics.print("Render depth: " .. _ROOMDEPTH, 10, 50)
+	love.graphics.print(tostring(player.invicible), 10, 70)
 end
 
 function love.resize()
 	renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
 end
 
-function love.mousepressed(x, y, button)
-	--Player:getMousepresses(x, y, button)
-end
-
 function love.wheelmoved(x, y)
-	--_ROOMDEPTH = _ROOMDEPTH + y
+	_ROOMDEPTH = _ROOMDEPTH + y
 end
 
 function love.keypressed(key)
-	--Player:getKeypress(key)
-
 	if key == "f5" then
 		love.event.quit("restart")
 	end
@@ -168,6 +135,7 @@ function loadSpritesheet()
 	tilemap = love.graphics.newImage("gfx/Dungeon_Tileset.png")
 	animationImage = love.graphics.newImage("gfx/0x72_DungeonTilesetII_v1.3.png")
 	smokeImage = love.graphics.newImage("gfx/smoke.png")
+	swingImage = love.graphics.newImage("gfx/swing02.png")
 	smallExplosionImage = love.graphics.newImage("gfx/explosion-small.png")
 
 	floorImages = {
@@ -224,16 +192,4 @@ function loadSpritesheet()
 		love.graphics.newQuad(96, 48, 16, 16, tilemap),
 		love.graphics.newQuad(112, 48, 16, 16, tilemap)
 	}
-end
-
-function spawnEnemies()
-	for _, j in ipairs(maze.rooms) do
-		if love.math.random() > 0.5 and j.isNode then
-
-			for _ = 1, love.math.random(1, 2) do
-				--table.insert(Enemies, smallEnemy:new(j.renderX + j.tileSize * 2 + love.math.random(j.w - j.tileSize * 4), j.renderY + j.tileSize * 2 + love.math.random(j.h - j.tileSize * 4)))
-				--Enemies[#Enemies]:update(0)
-			end
-		end
-	end
 end

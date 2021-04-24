@@ -290,19 +290,12 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 	end
 
 	function self:update(dt)
+		for _, j in ipairs(self:depthSearch(player.currentRoom, 2)) do
+			j.explored = true
+		end
+
 		for _, j in ipairs(self.rooms) do
-			local xLeft, yTop = playerCam:toScreen(j.renderX, j.renderY)
-			local xRight, yBottom = playerCam:toScreen(j.renderX + j.w, j.renderY + j.h)
-
-			if player.x >= j.renderX and player.x <= j.renderX + j.w and player.y >= j.renderY and player.y <= j.renderY + j.h then
-				if j.path[1] == 1 then self.rooms[self:getIndex(0, -1, j)].explored = true end
-				if j.path[2] == 1 then self.rooms[self:getIndex(1, 0, j)].explored = true end
-				if j.path[3] == 1 then self.rooms[self:getIndex(0, 1, j)].explored = true end
-				if j.path[4] == 1 then self.rooms[self:getIndex(-1, 0, j)].explored = true end
-				j.explored = true
-			end
-
-			if xRight > 0 and xLeft < 640 and yBottom > 0 and yTop < 360 then
+			if j.visible then
 				if #j.colliders == 0 and j.visited then
 					j:createColliders(World, self)
 				end

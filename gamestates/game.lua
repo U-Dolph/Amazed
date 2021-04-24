@@ -3,6 +3,8 @@ game = {}
 function game:init()
     self.cursor = love.mouse.newCursor( "gfx/cursor.png", 11, 11)
 	love.mouse.setCursor(self.cursor)
+
+    self.enemies = {}
 end
 
 function game:enter()
@@ -18,13 +20,25 @@ function game:enter()
     playerCam:setScale(1)
 
     self.enemies = {}
+
+    for i, j in ipairs(maze.rooms) do
+        if j.isNode and love.math.random() > 0.5 then
+            spawnEnemies(j.renderX, j.renderY)
+        end
+    end
+
+    for _, j in ipairs (self.enemies) do
+        j:update(0)
+    end
 end
 
 function game:update(dt)
     World:update(dt)
-	maze:update(dt)
 	player:update(dt)
+	maze:update(dt)
 	playerCam:setPosition(player.x, player.y)
+    self:updateEnemies(dt)
+    popupHandler:update(dt)
 
     preDrawLights()
 end
@@ -33,11 +47,13 @@ function game:draw()
     local entities = self:getEntitiesToRender()
 
     playerCam:draw(function(l,t,w,h)
-        local roomsRendered = maze:render()
+        maze:render()
 
         for i, j in ipairs(entities) do
             j:render()
         end
+
+        
 
         if doDrawColliders then World:draw() end
     end)
@@ -45,6 +61,8 @@ function game:draw()
     love.graphics.setBlendMode("multiply", "premultiplied")
 	if doDrawLight then love.graphics.draw(lightCanvas) end
 	love.graphics.setBlendMode("alpha")
+
+    popupHandler:render()
 
     hud:render()
 end
@@ -83,4 +101,27 @@ function game:getEntitiesToRender(excludePlayer)
 	table.sort(entities, function(a, b) return a.y < b.y end)
 
 	return entities
+end
+
+function game:updateEnemies(dt)
+    for i, j in ipairs (self.enemies) do
+        j:update(dt)
+
+        if j.health <= 0 then
+			if j.state ~= "explosion" then
+				j.state = "explosion"
+				j.footCollider:destroy()
+				j.bodyCollider:destroy()
+				j.timer:after(0.8, function() j.alive = false end)
+			end
+		end
+
+		if not j.alive then table.remove(self.enemies, i) end
+    end
+end
+
+function spawnEnemies(xCoord, yCoord)
+    local randomX, randomY = xCoord + maze.tileSize * 2 + love.math.random((maze.roomSize * maze.tileSize) - maze.tileSize * 4), yCoord + maze.tileSize * 2 + love.math.random((maze.roomSize * maze.tileSize) - maze.tileSize * 4)
+    table.insert(game.enemies, EnemyFactory.spawnEnemy(1, randomX, randomY))
+    game.enemies[#game.enemies]:update(0)
 end
