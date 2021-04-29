@@ -17,12 +17,6 @@ function smallEnemy:new(_x, _y)
 		["attacking"] = anim8.newAnimation(grid('27-31', rnd), 0.10),
 	}
 
-	--[[self.timer:every(1, function ()
-		if self.isAttacking and self.health > 0 and self.currentRoom.visible then
-			self.path = self:findPath(player)
-		end
-	end)]]
-
 	function self:update(dt)
 		self.timer:update(dt)
 		self.animations[self.state]:update(dt)
@@ -43,24 +37,11 @@ function smallEnemy:new(_x, _y)
 
 				self.bodyCollider:setPosition(self.x, self.y + 2)
 
-				local function worldRayCastCallback(fixture, x, y, xn, yn, fraction)
-					if fixture == player.footCollider.fixture and not self.isAttacking then
-						self:noticePlayer()
-					end
-
-					return 0
-				end
-
-				for i = 0, 18 do
-					World:rayCast(self.x, self.y, self.x + math.cos(math.pi/18 * i - math.pi/2) * 100 * self.direction, self.y + math.sin(math.pi/18 * i - math.pi/2) * 100, worldRayCastCallback)
-				end
-
+				if not self.isAttacking then self:lookAround() end
 
 				if self.isAttacking and self.state ~= "attacking" then
 					self:move()
 				end
-
-				
 
 				if self.isAttacking then
 					self.direction = player.x > self.x and 1 or -1
@@ -103,9 +84,10 @@ function smallEnemy:new(_x, _y)
 			if self.attackHandler then self.timer:cancel(self.attackHandler) end
 
 			if self.state ~= "explosion" then
+				player.killCount = player.killCount + 1
 				self.state = "explosion"
-				if self.footCollider and not self.footCollider:isDestroyed() then self.footCollider:destroy() end
-				if self.bodyCollider and not self.bodyCollider:isDestroyed() then self.bodyCollider:destroy() end
+				if self.footCollider then self.footCollider:destroy() end
+				if self.bodyCollider then self.bodyCollider:destroy() end
 				self.footCollider = nil
 				self.bodyCollider = nil
 				self.timer:after(0.8, function() self.alive = false end)
