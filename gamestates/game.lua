@@ -13,8 +13,8 @@ function game:enter()
     --!KOREGA REQUIEM DA!--
     for _, j in ipairs(World:getBodies()) do j:destroy() end
 
+    lightWorld  = Lighter()
 	maze:createMaze()
-
     player = Player:new()
     player:setPosition(maze.startNode.renderX, maze.startNode.renderY)
     playerCam:setScale(1)
@@ -30,6 +30,10 @@ function game:enter()
     for _, j in ipairs (self.enemies) do
         j:update(0)
     end
+
+    self.enterTime = os.clock()
+
+    self.sessionTime = 0
 end
 
 function game:update(dt)
@@ -52,8 +56,6 @@ function game:draw()
         for i, j in ipairs(entities) do
             j:render()
         end
-
-        
 
         if doDrawColliders then World:draw() end
     end)
@@ -80,7 +82,7 @@ function game:mousepressed(x, y, button)
 end
 
 function game:leave()
-
+    self.sessionTime = math.floor(os.clock() - self.enterTime) .. " s"
 end
 
 function game:resume()
@@ -106,15 +108,6 @@ end
 function game:updateEnemies(dt)
     for i, j in ipairs (self.enemies) do
         j:update(dt)
-
-        if j.health <= 0 then
-			if j.state ~= "explosion" then
-				j.state = "explosion"
-				j.footCollider:destroy()
-				j.bodyCollider:destroy()
-				j.timer:after(0.8, function() j.alive = false end)
-			end
-		end
 
 		if not j.alive then table.remove(self.enemies, i) end
     end
