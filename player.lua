@@ -30,12 +30,16 @@ function player:new()
 
 	self.currentFrame = 0
 
-	self.health = 100
+	self.health = 5
 	self.maxHealth = 100
 	self.power = 50
 	self.moveSpeed = 20
 	self.invicible = false
 	self.defense = 20
+
+	self.killCount = 0
+	self.dealtDamage = 0
+	self.receivedDamage = 0
 
 	self.state = "idle"
 	self.direction = 1
@@ -206,6 +210,12 @@ function player:new()
 			self.timer:after(0.3, function ()
 				self.invicible = false
 			end)
+
+			self.receivedDamage = self.receivedDamage + damage
+		end
+
+		if self.health <= 0 then
+			Gamestate.switch(gameover)
 		end
 	end
 
