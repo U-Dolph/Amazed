@@ -14,12 +14,13 @@ Minimap 	= require "minimap"
 HUD 		= require "HUD"
 Enemy 		= require "enemies.enemy"
 SmallEnemy 	= require "enemies.smallEnemy"
+require "enemyFactory"
+require "popupHandler"
 
 --*GAMESTATES*--
 require "gamestates.menu"
 require "gamestates.game"
-require "enemyFactory"
-require "popupHandler"
+require "gamestates.gameover"
 
 mazeWidth = 20
 mazeHeight = 20
@@ -27,6 +28,7 @@ mazeHeight = 20
 renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
 
 _ROOMDEPTH = 3
+doDrawLight = true
 
 function love.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
