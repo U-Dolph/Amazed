@@ -14,6 +14,9 @@ Minimap 	= require "minimap"
 HUD 		= require "HUD"
 Enemy 		= require "enemies.enemy"
 SmallEnemy 	= require "enemies.smallEnemy"
+Chest 		= require "chest"
+item 		= require "item"
+
 require "enemyFactory"
 require "popupHandler"
 
@@ -39,6 +42,8 @@ function love.load()
 	World:addCollisionClass('EnemyFoot')
 	World:addCollisionClass('PlayerFoot')
 	World:addCollisionClass('EnemyBody', {ignores = {'Wall', 'EnemyFoot', 'EnemyBody', 'PlayerFoot'}})
+	World:addCollisionClass('Chest', {ignores = {'Wall', "EnemyBody"}})
+	World:addCollisionClass('Item', {ignores = {'Chest', "EnemyBody", "EnemyFoot", "PlayerFoot"}})
 	World:setQueryDebugDrawing(true)
 
 	lightWorld  = Lighter()
@@ -194,4 +199,11 @@ function loadSpritesheet()
 		love.graphics.newQuad(96, 48, 16, 16, tilemap),
 		love.graphics.newQuad(112, 48, 16, 16, tilemap)
 	}
+
+	chestImages = {
+		love.graphics.newQuad(19 * 16, 18 * 16, 16, 16, animationImage),
+		love.graphics.newQuad(21 * 16, 18 * 16, 16, 16, animationImage)
+	}
+
+	healthPotionImage = love.graphics.newQuad(18 * 16, 14 * 16, 16, 16, animationImage)
 end
