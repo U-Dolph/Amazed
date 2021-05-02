@@ -6,7 +6,7 @@ function smallEnemy:new(_x, _y)
 	local grid = anim8.newGrid(16, 16, animationImage:getWidth(), animationImage:getHeight())
 	local explosionGrid = anim8.newGrid(16, 16, smallExplosionImage:getWidth(), smallExplosionImage:getHeight())
 	local rnd = love.math.random(2, 4)
-	self.speed = 25
+	self.speed = 50
 	self.power = 35
 	self.defense = 15
 
@@ -97,7 +97,7 @@ function smallEnemy:new(_x, _y)
 
 	function self:createCollider()
 		self.footCollider = World:newRectangleCollider(self.x - 6, self.y + 4.5, 12, 3)
-		self.footCollider:setLinearDamping(5)
+		self.footCollider:setLinearDamping(10)
 		self.footCollider:setFixedRotation(true)
 		self.footCollider:setCollisionClass("EnemyFoot")
 		self.footCollider:setObject(self)
@@ -112,20 +112,16 @@ function smallEnemy:new(_x, _y)
 		self.canAttack = false
 		self.canMove = false
 
-		popupHandler:addElement("!", self.x, self.y - 18, {1, 1, 0})
+		popupHandler:addElement("!", self.x - 32, self.y - 18, {1, 1, 0})
 
 		self.attackHandler = self.timer:after(0.5, function ()
 			local _angle = lume.angle(self.x, self.y, player.x, player.y)
 			self.state = "attacking"
 
 			if self.footCollider then self.footCollider:applyLinearImpulse(math.cos(_angle) * 30, math.sin(_angle) * 30) end
-			self.timer:after(1, function ()
-				self.canAttack = true
-			end)
-			self.timer:after(0.2, function ()
-				self.state = "idle"
-				self.canMove = true
-			end)
+			self.timer:after(1, 	function () self.canAttack 	= true end)
+			self.timer:after(0.2, 	function () self.state 		= "idle" end)
+			self.timer:after(0.75, 	function () self.canMove 	= true end)
 		end)
 	end
 

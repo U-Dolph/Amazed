@@ -20,6 +20,6 @@ function popupHandler:render()
     love.graphics.setFont(self.font)
     for i, j in ipairs(self.elements) do
         local x, y = playerCam:toScreen(j.x, j.y)
-        love.graphics.printf({j.color, j.displayText}, x, y, 20)
+        love.graphics.printf({j.color, j.displayText}, x, y, 64, "center")
     end
 end

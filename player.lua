@@ -30,7 +30,7 @@ function player:new()
 
 	self.currentFrame = 0
 
-	self.health = 5
+	self.health = 100
 	self.maxHealth = 100
 	self.power = 50
 	self.moveSpeed = 20
@@ -136,6 +136,12 @@ function player:new()
 			self.footCollider:applyLinearImpulse(math.cos(angle) * -5, math.sin(angle) * -5)
 		end]]
 
+		if self.footCollider:enter('Item') then
+			local collision_data = self.footCollider:getEnterCollisionData('Item')
+			local itemPickedUp = collision_data.collider:getObject()
+			itemPickedUp:pickUp()
+		end
+
 		lightWorld:updateLight(self.light, self.x, self.y)
 	end
 
@@ -188,11 +194,9 @@ function player:new()
 
 			local colliders = World:queryCircleArea(self.x + math.cos(_angle) * 24, self.y + math.sin(_angle) * 24, 28, {"EnemyFoot"})
 			for _, collider in ipairs(colliders) do
-				--angle = lume.angle(self.x, self.y, collider:getX(), collider:getY())
-				--collider:applyLinearImpulse(math.cos(angle) * 15, math.sin(angle) * 15)
 				local enemy = collider:getObject()
-				--enemy.invicible = true
 				enemy:takeDamage(self.power)
+
 				if not enemy.isAttacking then
 					enemy:noticePlayer()
 				end
@@ -203,7 +207,7 @@ function player:new()
 	function self:takeDamage(value)
 		if not self.invicible and self.health > 0 then
 			local damage = math.max(1, (value - self.defense) + love.math.random(-4, 4))
-			popupHandler:addElement(damage, self.x, self.y - 18, {1, 0.5, 0})
+			popupHandler:addElement(damage, self.x - 32, self.y - 18, {1, 0.5, 0})
 			self.health = self.health - damage
 			self.invicible = true
 

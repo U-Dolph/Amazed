@@ -128,7 +128,7 @@ function enemy:new(_x, _y)
 	function self:takeDamage(value)
 		if not self.invicible and self.health > 0 then
 			local damage = math.max(1, (value - self.defense) + love.math.random(-4, 4))
-			popupHandler:addElement(damage, self.x, self.y - 18, {1, 0, 0})
+			popupHandler:addElement(damage, self.x - 32, self.y - 18, {1, 0, 0})
 			self.invicible = true
 			self.health = self.health - damage
 			self.timer:after(0.2, function () self.invicible = false end)
@@ -154,7 +154,7 @@ function enemy:new(_x, _y)
 		self.path = self:findPath(player)
 		if #self.path <= 2 then
 			self.isAttacking = true
-			popupHandler:addElement("?", self.x, self.y - 18, {1, 0.5, 0.5})
+			popupHandler:addElement("?", self.x - 32, self.y - 18, {1, 0.5, 0.5})
 		end
 	end
 
