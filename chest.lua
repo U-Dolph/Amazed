@@ -62,9 +62,7 @@ function chest:new(_x, _y)
 	function self:fillChest()
 		local items = {}
 
-		for i = 1, love.math.random(1, 1) do
-			table.insert(items, item:new(self.x + 8, self.y + 12, ITEM_TYPES.healthPotion))
-		end
+		table.insert(items, item:new(self.x + 8, self.y + 12, ITEM_TYPES.healthPotion))
 
 		return items
 	end

@@ -164,7 +164,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 		for _, j in ipairs(self.rooms) do
 			if j.visited then
 				j:createTilemap()
-				j.explored = true
+				j.explored = false
 
 				--!Don't want shadows in the menu
 				if not isMenuState then

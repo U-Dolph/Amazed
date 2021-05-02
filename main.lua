@@ -206,4 +206,5 @@ function loadSpritesheet()
 	}
 
 	healthPotionImage = love.graphics.newQuad(18 * 16, 14 * 16, 16, 16, animationImage)
+	keyImage = love.graphics.newQuad(9 * 16, 9 * 16, 16, 16, tilemap)
 end
