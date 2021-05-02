@@ -23,6 +23,14 @@ function HUD:new()
 		love.graphics.setScissor()
 
 		love.graphics.draw(self.healthbar.frameImage, self.healthbar.x, self.healthbar.y)
+
+		local yCoord = 150
+		for i, j in ipairs(player.inventory) do
+			if j.id == ITEM_TYPES.key then
+				love.graphics.draw(tilemap, j.image, 640 - 16 - 8, yCoord, 0, 1, 1, j.renderCenter.x, j.renderCenter.y)
+			end
+			yCoord = yCoord + 16
+		end
 	end
 
 	return self
