@@ -26,12 +26,6 @@ function smallEnemy:new(_x, _y)
 			if self.currentRoom.visible then
 				if not self.footCollider then self:createCollider() end
 
-				self.path = self:findPath(player)
-
-				self.path[1][1] = player.x
-				self.path[1][2] = player.y
-				self.path[#self.path] = {self.path[#self.path][1], self.path[#self.path][2], self.x, self.y}
-
 				self.x = self.footCollider:getX()
 				self.y = self.footCollider:getY() - 6
 
@@ -52,13 +46,17 @@ function smallEnemy:new(_x, _y)
 						self.path = self:findPath(player)
 					end
 
+					self.path[1][1] = player.x
+					self.path[1][2] = player.y
+					self.path[#self.path] = {self.path[#self.path][1], self.path[#self.path][2], self.x, self.y}
+
 					if lume.distance(self.x, self.y, player.x, player.y) < 50 then
 						if self.canAttack then self:attack() end
 					end
 				end
 
-				if self.bodyCollider:enter('PlayerFoot') and player.state == "dashing" then	
-					self:takeDamage(player.power)
+				if self.bodyCollider:enter('PlayerFoot') then
+					if player.state == "dashing" then self:takeDamage(player.power) end
 					if not self.isAttacking then
 						self:noticePlayer()
 					end
@@ -118,7 +116,7 @@ function smallEnemy:new(_x, _y)
 			local _angle = lume.angle(self.x, self.y, player.x, player.y)
 			self.state = "attacking"
 
-			if self.footCollider then self.footCollider:applyLinearImpulse(math.cos(_angle) * 30, math.sin(_angle) * 30) end
+			if self.footCollider then self.footCollider:applyLinearImpulse(math.cos(_angle) * 45, math.sin(_angle) * 45) end
 			self.timer:after(1, 	function () self.canAttack 	= true end)
 			self.timer:after(0.2, 	function () self.state 		= "idle" end)
 			self.timer:after(0.75, 	function () self.canMove 	= true end)
