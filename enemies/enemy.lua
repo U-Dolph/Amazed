@@ -144,7 +144,8 @@ function enemy:new(_x, _y)
 		self.state = "idle"
 		local targetX, targetY = self.path[#self.path][1], self.path[#self.path][2]
 		local angle = lume.angle(self.x, self.y, targetX, targetY)
-		if self.canMove then 
+
+		if self.canMove then
 			self.state = "running"
 			self.footCollider:applyForce(math.cos(angle) * self.speed, math.sin(angle) * self.speed)
 		end
@@ -167,8 +168,10 @@ function enemy:new(_x, _y)
 	end
 
 	function self:lookAround()
-		for i = 0, 18 do
-			World:rayCast(self.x, self.y, self.x + math.cos(math.pi/18 * i - math.pi/2) * 100 * self.direction, self.y + math.sin(math.pi/18 * i - math.pi/2) * 100, worldRayCastCallback)
+		if lume.distance(self.x, self.y, player.x, player.y) < 120 then
+			for i = 0, 18 do
+				World:rayCast(self.x, self.y, self.x + math.cos(math.pi/18 * i - math.pi/2) * 100 * self.direction, self.y + math.sin(math.pi/18 * i - math.pi/2) * 100, worldRayCastCallback)
+			end
 		end
 	end
 
