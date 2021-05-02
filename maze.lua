@@ -164,6 +164,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 		for _, j in ipairs(self.rooms) do
 			if j.visited then
 				j:createTilemap()
+				j.explored = true
 
 				--!Don't want shadows in the menu
 				if not isMenuState then
@@ -191,15 +192,15 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 			end
 		end
 
-		local startIndex, endIndex = love.math.random(#self.rooms), love.math.random(#self.rooms)
+		self.startIndex, self.endIndex = love.math.random(#self.rooms), love.math.random(#self.rooms)
 
 		--Pick a random entrance
-		while not self.rooms[startIndex].isNode do startIndex = love.math.random(#self.rooms) end
-		self.startNode = self.rooms[startIndex].node
+		while not self.rooms[self.startIndex].isNode do self.startIndex = love.math.random(#self.rooms) end
+		self.startNode = self.rooms[self.startIndex].node
 
 		--Pick a random exit
-		while not self.rooms[endIndex].isNode do endIndex = love.math.random(#self.rooms) end
-		self.endNode = self.rooms[endIndex].node
+		while not (self.rooms[self.endIndex].isNode and self.rooms[self.endIndex].path[1] == 0) do self.endIndex = love.math.random(#self.rooms) end
+		self.endNode = self.rooms[self.endIndex].node
 	end
 
 	function self:solvePath()
