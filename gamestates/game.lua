@@ -31,10 +31,12 @@ function game:enter()
 
     for _, j in ipairs(maze.rooms) do
         local random = love.math.random()
-        if j.isNode and random > 0.5 and j.path[1] == 0 then
+        if j.isNode and random > 0.9 and j.path[1] == 0 and j.node ~= maze.endNode then
             table.insert(self.chests, Chest:new(j.renderX + 64, j.renderY + 16))
         end
     end
+
+    placeKeys()
 
     for _, j in ipairs (self.enemies) do
         j:update(0)
@@ -86,8 +88,24 @@ function game:keypressed(key)
 
     if key == "e" then
         for i, j in ipairs(self.chests) do
-            if lume.distance(j.x + 8, j.y, player.x, player.y) < 30 and not self.opened then
+            if lume.distance(j.x + 8, j.y, player.x, player.y) < 30 and not j.opened then
                 j:open()
+            end
+        end
+
+        if player.currentRoom.node == maze.endNode then
+            if lume.distance(player.currentRoom.renderX + maze.roomSize/2 * maze.tileSize, player.currentRoom.renderY, player.x, player.y) < 30 then
+                local gatheredKeys = 0
+
+                for i, j in ipairs(player.inventory) do
+                    if j.id == ITEM_TYPES.key then gatheredKeys = gatheredKeys + 1 end
+                end
+
+                if gatheredKeys >= 3 then
+                    Gamestate.switch(gameover, "success")
+                else
+                    popupHandler:addElement("Need " .. 3 - gatheredKeys .. " more " .. (3 - gatheredKeys == 1 and " key!" or " keys!"), player.currentRoom.renderX + maze.roomSize/2 * maze.tileSize, player.currentRoom.renderY + 8, {1, 0, 1})
+                end
             end
         end
     end
@@ -147,4 +165,22 @@ function spawnEnemies(xCoord, yCoord)
     local randomX, randomY = xCoord + maze.tileSize * 2 + love.math.random((maze.roomSize * maze.tileSize) - maze.tileSize * 4), yCoord + maze.tileSize * 2 + love.math.random((maze.roomSize * maze.tileSize) - maze.tileSize * 4)
     table.insert(game.enemies, EnemyFactory.spawnEnemy(ENEMY_TYPES.SmallEnemy, randomX, randomY))
     game.enemies[#game.enemies]:update(0)
+end
+
+function placeKeys()
+    local keysLeft = 3
+
+    while keysLeft > 0 do
+        local selectedChest = game.chests[love.math.random(1, #game.chests)]
+        local isValid = true
+
+        for i, j in ipairs(selectedChest.items) do
+            if j.id == ITEM_TYPES.key then isValid = false end
+        end
+
+        if isValid then
+            table.insert(selectedChest.items, item:new(selectedChest.x + 8, selectedChest.y + 12, ITEM_TYPES.key))
+            keysLeft = keysLeft - 1
+        end
+    end
 end
