@@ -5,6 +5,7 @@ function game:init()
 	love.mouse.setCursor(self.cursor)
 
     self.enemies = {}
+    self.chests = {}
 end
 
 function game:enter()
@@ -20,10 +21,18 @@ function game:enter()
     playerCam:setScale(1)
 
     self.enemies = {}
+    self.chests = {}
 
-    for i, j in ipairs(maze.rooms) do
+    for _, j in ipairs(maze.rooms) do
         if j.isNode and love.math.random() > 0.5 then
             spawnEnemies(j.renderX, j.renderY)
+        end
+    end
+
+    for _, j in ipairs(maze.rooms) do
+        local random = love.math.random()
+        if j.isNode and random > 0.5 and j.path[1] == 0 then
+            table.insert(self.chests, Chest:new(j.renderX + 64, j.renderY + 16))
         end
     end
 
@@ -42,6 +51,7 @@ function game:update(dt)
 	maze:update(dt)
 	playerCam:setPosition(player.x, player.y)
     self:updateEnemies(dt)
+    self:updateChests(dt)
     popupHandler:update(dt)
 
     preDrawLights()
@@ -73,6 +83,14 @@ function game:keypressed(key)
     if key == "space" then
         player:dash()
     end
+
+    if key == "e" then
+        for i, j in ipairs(self.chests) do
+            if lume.distance(j.x + 8, j.y, player.x, player.y) < 30 and not self.opened then
+                j:open()
+            end
+        end
+    end
 end
 
 function game:mousepressed(x, y, button)
@@ -100,6 +118,12 @@ function game:getEntitiesToRender(excludePlayer)
 		end
 	end
 
+    for i, j in ipairs(self.chests) do
+		if j.currentRoom.visible then
+			table.insert(entities, j)
+		end
+	end
+
 	table.sort(entities, function(a, b) return a.y < b.y end)
 
 	return entities
@@ -113,8 +137,14 @@ function game:updateEnemies(dt)
     end
 end
 
+function game:updateChests(dt)
+    for _, j in ipairs (self.chests) do
+        j:update(dt)
+    end
+end
+
 function spawnEnemies(xCoord, yCoord)
     local randomX, randomY = xCoord + maze.tileSize * 2 + love.math.random((maze.roomSize * maze.tileSize) - maze.tileSize * 4), yCoord + maze.tileSize * 2 + love.math.random((maze.roomSize * maze.tileSize) - maze.tileSize * 4)
-    table.insert(game.enemies, EnemyFactory.spawnEnemy(1, randomX, randomY))
+    table.insert(game.enemies, EnemyFactory.spawnEnemy(ENEMY_TYPES.SmallEnemy, randomX, randomY))
     game.enemies[#game.enemies]:update(0)
 end
