@@ -37,6 +37,8 @@ function player:new()
 	self.invicible = false
 	self.defense = 20
 
+	self.inventory = {}
+
 	self.killCount = 0
 	self.dealtDamage = 0
 	self.receivedDamage = 0
@@ -123,19 +125,6 @@ function player:new()
 		self.sword.yOffset = math.sin(self.sword.angle - math.pi / 2) * 5 + 2
 		self.sword.xOffset = math.cos(self.sword.angle - math.pi / 2) * 5
 
-		--[[if self.footCollider:enter("EnemyFoot") and not self.invicible and self.state ~= "dashing" then
-			local collision_data = self.footCollider:getEnterCollisionData('EnemyFoot')
-    		local enemy = collision_data.collider:getObject()
-
-			angle = lume.angle(self.x, self.y, enemy.x, enemy.y)
-			self.health = self.health - 10
-			self.invicible = true
-
-			self.timer:after(0.5, function () self.invicible = false end)
-
-			self.footCollider:applyLinearImpulse(math.cos(angle) * -5, math.sin(angle) * -5)
-		end]]
-
 		if self.footCollider:enter('Item') then
 			local collision_data = self.footCollider:getEnterCollisionData('Item')
 			local itemPickedUp = collision_data.collider:getObject()
@@ -219,7 +208,7 @@ function player:new()
 		end
 
 		if self.health <= 0 then
-			Gamestate.switch(gameover)
+			Gamestate.switch(gameover, "failure")
 		end
 	end
 
@@ -237,7 +226,13 @@ function player:new()
 		love.graphics.draw(self.sword.image, self.x + self.sword.xOffset, self.y + self.sword.yOffset - self.sword.animationOffsets[self.state][self.currentFrame], self.sword.angle, 1, 1, 5, 15)
 		self.animations[self.state]:draw(animationImage, self.x, self.y, 0, self.direction, 1, 8, 24)
 
-		--love.graphics.rectangle("line", self.x + math.min(self.direction, 0) * 21, self.y - 8, 21, 18)
+		if self.currentRoom.node == maze.endNode and lume.distance(self.x, self.y, self.currentRoom.renderX + maze.roomSize/2 * maze.tileSize, self.currentRoom.renderY) < 30 then
+			love.graphics.rectangle("fill", self.currentRoom.renderX + maze.roomSize/2 * maze.tileSize - 6, self.currentRoom.renderY, 12, 12, 3)
+			love.graphics.setFont(popupHandler.font)
+			love.graphics.setColor(0, 0, 0, 1)
+			love.graphics.print("E", self.currentRoom.renderX + maze.roomSize/2 * maze.tileSize - 3, self.currentRoom.renderY + 2)
+			love.graphics.setColor(1, 1, 1)
+		end
 	end
 
 	function self:getCurrentRoom()
