@@ -4,7 +4,7 @@ function gameover:init()
     self.quoteFont = love.graphics.newFont("ast/alagard.ttf", 32)
     self.printFont = love.graphics.newFont("ast/alagard.ttf", 16)
 
-    self.quotes = {
+    self.failQuotes = {
         "Choked on a user's soul",
         "Used Alt-F4 on yourself",
         "Blue Screened",
@@ -22,14 +22,28 @@ function gameover:init()
         "Omae wa mou shindeiru"
     }
 
-    self.currentText = self.quotes[love.math.random(1, #self.quotes)]
+    self.successQuotes = {
+        "Was not that hard!",
+        "What did take so long?",
+        "I thought you would not make it"
+    }
+
+    self.currentText = self.failQuotes[love.math.random(1, #self.failQuotes)]
+    self.textColor = {1, 1, 1}
 
     self.timer = Timer.new()
     self.from = nil
 end
 
-function gameover:enter(from)
-    self.currentText = self.quotes[love.math.random(1, #self.quotes)]
+function gameover:enter(from, ending)
+    if ending == "failure" then
+        self.currentText = self.failQuotes[love.math.random(1, #self.failQuotes)]
+        self.textColor = {1, 0, 0}
+    elseif ending == "success" then
+        self.currentText = self.successQuotes[love.math.random(1, #self.successQuotes)]
+        self.textColor = {0, 0.5, 1}
+    end
+
     self.from = from
 end
 
@@ -38,7 +52,7 @@ function gameover:update(dt)
 end
 
 function gameover:draw()
-    love.graphics.setColor(1, 0, 0)
+    love.graphics.setColor(self.textColor)
     love.graphics.setFont(self.quoteFont)
     love.graphics.printf(self.currentText, 0, 80, 640, "center")
     love.graphics.setColor(1, 1, 1)
