@@ -45,6 +45,8 @@ function gameover:enter(from, ending)
     end
 
     self.from = from
+
+    self.exploredPercent = getExploredPercentage()
 end
 
 function gameover:update(dt)
@@ -66,6 +68,8 @@ function gameover:draw()
     love.graphics.print(player.receivedDamage, 420, 200, 0, 1, 1, self.printFont:getWidth(player.receivedDamage))
     love.graphics.print("Time:", 220, 220)
     love.graphics.print(game.sessionTime, 420, 220, 0, 1, 1, self.printFont:getWidth(game.sessionTime))
+    love.graphics.print("Explored:", 220, 240)
+    love.graphics.print(self.exploredPercent, 420, 240, 0, 1, 1, self.printFont:getWidth(self.exploredPercent))
 
     love.graphics.print("ESC - Return to menu", 10, 360 - 20)
     love.graphics.print("Space - Start new game", 640 - 10 - self.printFont:getWidth("Space - Start new game"), 360 - 20)
@@ -91,4 +95,16 @@ end
 
 function gameover:resume()
 
+end
+
+function getExploredPercentage()
+    local totalRooms = 0
+    local exploredRooms = 0
+
+    for i, j in ipairs(maze.rooms) do
+        if j.isNode then totalRooms = totalRooms + 1 end
+        if j.explored then exploredRooms = exploredRooms + 1 end
+    end
+
+    return lume.round(exploredRooms/totalRooms * 100) .. "%"
 end
