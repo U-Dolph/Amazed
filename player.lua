@@ -67,6 +67,7 @@ function player:new()
 	self.footCollider:setFixedRotation(true)
 	self.footCollider:setMass(self.footCollider:getMass() / 3)
 	self.footCollider:setCollisionClass("PlayerFoot")
+	self.footCollider:setObject(self)
 
 	self.light = lightWorld:addLight(self.x, self.y, 360, 1, 1, 1)
 
@@ -174,7 +175,6 @@ function player:new()
 
 			self.timer:tween(0.15, self.sword, {angle = _angle + 1 + math.pi / 2}, "out-cubic", function()
 				self.sword.isDownSwinging = false
-				--self.timer:tween(0.05, self.sword, {angle = 0.15 * math.pi, xOffset = 5, yOffset = 2}, "in-linear")
 			end)
 
 			self.timer:after(0.2, function() self.canAttack = true end)

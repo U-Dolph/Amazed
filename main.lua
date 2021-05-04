@@ -14,6 +14,7 @@ Minimap 	= require "minimap"
 HUD 		= require "HUD"
 Enemy 		= require "enemies.enemy"
 SmallEnemy 	= require "enemies.smallEnemy"
+SludgeEnemy = require "enemies.sludgeEnemy"
 Chest 		= require "chest"
 item 		= require "item"
 

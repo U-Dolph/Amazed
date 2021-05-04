@@ -142,12 +142,15 @@ function enemy:new(_x, _y)
 
 	function self:move()
 		self.state = "idle"
-		local targetX, targetY = self.path[#self.path][1], self.path[#self.path][2]
-		local angle = lume.angle(self.x, self.y, targetX, targetY)
 
-		if self.canMove then
-			self.state = "running"
-			self.footCollider:applyForce(math.cos(angle) * self.speed, math.sin(angle) * self.speed)
+		if #self.path > 0 then
+			local targetX, targetY = self.path[#self.path][1], self.path[#self.path][2]
+			local angle = lume.angle(self.x, self.y, targetX, targetY)
+
+			if self.canMove then
+				self.state = "running"
+				self.footCollider:applyForce(math.cos(angle) * self.speed, math.sin(angle) * self.speed)
+			end
 		end
 	end
 
