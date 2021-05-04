@@ -71,6 +71,7 @@ function item:new(_x, _y, _id)
 				local healAmount = math.min(ITEM_TYPES.healthPotion.heals, player.maxHealth - player.health)
 				player.health = player.health + healAmount
 				popupHandler:addElement("+" .. healAmount .. " HP", player.x - 32, player.y - 18, {0, 1, 0})
+				Audio.Effects.potionPickup:play()
 			else
 				popupHandler:addElement("MAX HP!", player.x - 32, player.y - 18, {0, 1, 1})
 			end
@@ -80,6 +81,7 @@ function item:new(_x, _y, _id)
 			self.collider:destroy()
 			self.display = false
 			popupHandler:addElement("Found 1 key", player.x - 32, player.y - 18, {1, 1, 0})
+			Audio.Effects.keyPickup:play()
 
 			table.insert(player.inventory, self)
 		end
