@@ -45,6 +45,8 @@ function game:enter()
     self.enterTime = os.clock()
 
     self.sessionTime = 0
+
+    self.totalEnemies = #self.enemies
 end
 
 function game:update(dt)

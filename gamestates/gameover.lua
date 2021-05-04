@@ -61,7 +61,7 @@ function gameover:draw()
 
     love.graphics.setFont(self.printFont)
     love.graphics.print("Killed:", 220, 160)
-    love.graphics.print(player.killCount, 420, 160, 0, 1, 1, self.printFont:getWidth(player.killCount))
+    love.graphics.print(player.killCount .. "/" .. self.from.totalEnemies, 420, 160, 0, 1, 1, self.printFont:getWidth(player.killCount .. "/" .. self.from.totalEnemies))
     love.graphics.print("Damage dealt:", 220, 180)
     love.graphics.print(player.dealtDamage, 420, 180, 0, 1, 1, self.printFont:getWidth(player.dealtDamage))
     love.graphics.print("Damage received:", 220, 200)
