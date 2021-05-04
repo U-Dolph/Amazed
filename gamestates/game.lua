@@ -24,7 +24,7 @@ function game:enter()
     self.chests = {}
 
     for _, j in ipairs(maze.rooms) do
-        if j.isNode and love.math.random() > 0.5 then
+        if j.isNode and love.math.random() > 0.5 and j.node ~= maze.startNode then
             spawnEnemies(j.renderX, j.renderY)
         end
     end
