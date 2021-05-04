@@ -11,8 +11,6 @@ function sludgeEnemy:new(_x, _y)
 	self.power = 55
 	self.defense = 25
 
-	--tostring(24 + rnd * 4 .. '-' .. 25 + rnd * 4)
-
 	self.animations = {
 		["idle"] = anim8.newAnimation(grid(tostring(24 + rnd * 4 .. '-' .. 25 + rnd * 4), 8, 27 + rnd * 4, 8), 0.10),
 		["running"] = anim8.newAnimation(grid(tostring(24 + rnd * 4 .. '-' .. 27 + rnd * 4), 8), 0.10),
@@ -43,9 +41,11 @@ function sludgeEnemy:new(_x, _y)
 						self.path = self:findPath(player)
 					end
 
-					self.path[1][1] = player.x
-					self.path[1][2] = player.y
-					self.path[#self.path] = {self.path[#self.path][1], self.path[#self.path][2], self.x, self.y}
+					if #self.path > 0 then
+						self.path[1][1] = player.x
+						self.path[1][2] = player.y
+						self.path[#self.path] = {self.path[#self.path][1], self.path[#self.path][2], self.x, self.y}
+					end
 
 					if lume.distance(self.x, self.y, player.x, player.y) < 20 then
 						if self.canAttack then self:attack() end
