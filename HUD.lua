@@ -33,6 +33,10 @@ function HUD:new()
 		end
 	end
 
+	function self:renderLarge()
+		self.minimap:renderLargeMap()
+	end
+
 	return self
 end
 

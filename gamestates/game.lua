@@ -78,7 +78,11 @@ function game:draw()
 
     popupHandler:render()
 
-    hud:render()
+    if love.keyboard.isDown("tab") then
+        hud:renderLarge()
+    else
+        hud:render()
+    end
 end
 
 function game:keypressed(key)

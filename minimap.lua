@@ -1,3 +1,4 @@
+local room = require "room"
 local minimap = {}
 
 function minimap:new(_x, _y, _w, _h)
@@ -56,6 +57,15 @@ function minimap:new(_x, _y, _w, _h)
 			end
 		end
 
+		for _, j in ipairs(game.chests) do
+			if j.currentRoom.explored then
+				if j.opened then love.graphics.setColor(0.5, 0.5, 0.5, 1)
+				else love.graphics.setColor(1, 0.8, 0, 1) end
+
+				love.graphics.rectangle("fill", self.x + 6 + j.currentRoom.x * self.roomSize + self.roomSize/2, self.y + 6 + j.currentRoom.y * self.roomSize + 1, 1, 1)
+			end
+		end
+
 		local playerTileX = math.ceil(player.x / maze.tileSize)
 		local playerTileY = math.ceil((player.y + 6) / maze.tileSize)
 
@@ -67,6 +77,55 @@ function minimap:new(_x, _y, _w, _h)
 
 		love.graphics.setColor(1, 1, 1)
 		love.graphics.draw(self.frame, self.x, self.y)
+	end
+
+	function self:renderLargeMap()
+		love.graphics.draw(self.background, 152, 12, 0, 3, 3)
+		love.graphics.draw(self.frame, 152, 12, 0, 3, 3)
+
+		local roomSize = math.floor(300 / maze.width) - 1
+		local offsetX = math.floor((300 - roomSize * maze.width) / 2)
+
+		for _, j in ipairs(maze.rooms) do
+			if j.explored then
+				love.graphics.setColor(0, 0, 0, 0.3)
+				if j.node == maze.endNode then love.graphics.setColor(0.5, 0.5, 1, 0.3) end
+
+				if j == player.currentRoom then
+					love.graphics.setColor(0, math.max(0.2, math.abs(math.cos(os.clock()))), 0, 0.5)
+					love.graphics.rectangle("fill", 170 + offsetX + j.x * roomSize, 30 + offsetX + j.y * roomSize, roomSize, roomSize)
+				end
+
+				love.graphics.rectangle("fill", 170 + offsetX + j.x * roomSize, 30 + offsetX + j.y * roomSize, roomSize, roomSize)
+				love.graphics.setColor(110/255, 74/255, 72/255)
+				love.graphics.setLineStyle("rough")
+
+				if j.path[1] == 0 then
+					love.graphics.line(170 + offsetX + j.x * roomSize, 30 + offsetX + j.y * roomSize + 1, 170 + offsetX + j.x * roomSize + roomSize, 30 + offsetX + j.y * roomSize + 1)
+				end
+
+				if j.path[2] == 0 then
+					love.graphics.line(170 + offsetX + j.x * roomSize + roomSize, 30 + offsetX + j.y * roomSize, 170 + offsetX + j.x * roomSize + roomSize, 30 + offsetX + j.y * roomSize + roomSize)
+				end
+
+				if j.path[3] == 0 then
+					love.graphics.line(170 + offsetX + j.x * roomSize, 30 + offsetX + j.y * roomSize + roomSize, 170 + offsetX + j.x * roomSize + roomSize, 30 + offsetX + j.y * roomSize + roomSize)
+				end
+
+				if j.path[4] == 0 then
+					love.graphics.line(170 + offsetX + j.x * roomSize, 30 + offsetX + j.y * roomSize, 170 + offsetX + j.x * roomSize, 30 + offsetX + j.y * roomSize + roomSize)
+				end
+			end
+		end
+
+		for _, j in ipairs(game.chests) do
+			if j.currentRoom.explored then
+				if j.opened then love.graphics.setColor(0.5, 0.5, 0.5, 1)
+				else love.graphics.setColor(1, 0.8, 0, 1) end
+
+				love.graphics.rectangle("fill", 170 + offsetX + j.currentRoom.x * roomSize + roomSize/2, 30 + offsetX + j.currentRoom.y * roomSize + 1, 1, 1)
+			end
+		end
 	end
 
 	return self
