@@ -18,6 +18,9 @@ function sludgeEnemy:new(_x, _y)
 		["attacking"] = anim8.newAnimation(grid(tostring(25 + rnd * 4 .. '-' .. 27 + rnd * 4), 8), 0.10)
 	}
 
+	self.noticeSound = Audio.Effects.sludgeEnemyNotice
+	self.hitSound = Audio.Effects.sludgeEnemyHit
+
 	function self:update(dt)
 		self.timer:update(dt)
 		self.animations[self.state]:update(dt)

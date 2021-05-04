@@ -59,7 +59,9 @@ function player:new()
 			["idle"] = {2, 1, 0, 1},
 			["running"] = {1, 3, 4, 3, 2},
 			["dashing"] = {4, 4, 3}
-		}
+		},
+
+		sound = Audio.Effects.swordSwing
 	}
 
 	self.footCollider = World:newRectangleCollider(self.x - 6, self.y + 6, 12, 3)
@@ -170,6 +172,7 @@ function player:new()
 		if self.canAttack then
 			self.direction = mx > self.x and 1 or -1
 			self.canAttack = false
+			self.sword.sound:play()
 
 			self.sword.isDownSwinging = true
 

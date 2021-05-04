@@ -129,8 +129,10 @@ function enemy:new(_x, _y)
 		if not self.invicible and self.health > 0 then
 			local damage = math.max(1, (value - self.defense) + love.math.random(-4, 4))
 			popupHandler:addElement(damage, self.x - 32, self.y - 18, {1, 0, 0})
+			if self.hitSound then self.hitSound:play() end
 			self.invicible = true
 			self.health = self.health - damage
+
 			self.timer:after(0.2, function () self.invicible = false end)
 
 			local angle = lume.angle(self.x, self.y, player.x, player.y)
@@ -159,6 +161,8 @@ function enemy:new(_x, _y)
 		if #self.path <= 2 then
 			self.isAttacking = true
 			popupHandler:addElement("?", self.x - 32, self.y - 18, {1, 0.5, 0.5})
+
+			if self.noticeSound then self.noticeSound:play() end
 		end
 	end
 

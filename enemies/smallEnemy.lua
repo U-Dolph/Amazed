@@ -6,6 +6,7 @@ function smallEnemy:new(_x, _y)
 	local grid = anim8.newGrid(16, 16, animationImage:getWidth(), animationImage:getHeight())
 	local explosionGrid = anim8.newGrid(16, 16, smallExplosionImage:getWidth(), smallExplosionImage:getHeight())
 	local rnd = love.math.random(2, 4)
+
 	self.speed = 50
 	self.power = 35
 	self.defense = 15
@@ -16,6 +17,9 @@ function smallEnemy:new(_x, _y)
 		["explosion"] = anim8.newAnimation(explosionGrid('1-8', 1), 0.1),
 		["attacking"] = anim8.newAnimation(grid('27-31', rnd), 0.10),
 	}
+
+	self.noticeSound = Audio.Effects.smallEnemyNotice
+	self.hitSound = Audio.Effects.smallEnemyHit
 
 	function self:update(dt)
 		self.timer:update(dt)
