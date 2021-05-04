@@ -163,7 +163,18 @@ end
 
 function spawnEnemies(xCoord, yCoord)
     local randomX, randomY = xCoord + maze.tileSize * 2 + love.math.random((maze.roomSize * maze.tileSize) - maze.tileSize * 4), yCoord + maze.tileSize * 2 + love.math.random((maze.roomSize * maze.tileSize) - maze.tileSize * 4)
-    table.insert(game.enemies, EnemyFactory.spawnEnemy(ENEMY_TYPES.SmallEnemy, randomX, randomY))
+
+    local selectFrom = {}
+
+    for i, j in pairs(ENEMY_TYPES) do
+        for k = 1, j.weight do
+            table.insert(selectFrom, j)
+        end
+    end
+
+    local rolled = selectFrom[love.math.random(1, #selectFrom)]
+
+    table.insert(game.enemies, EnemyFactory.spawnEnemy(rolled, randomX, randomY))
     game.enemies[#game.enemies]:update(0)
 end
 
