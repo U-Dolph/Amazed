@@ -1,1 +1,2 @@
-call "C:\Program Files\LOVE\love.exe" .
+
+call ".builds/x64/love.exe" .
