@@ -1,3 +1,4 @@
+ripple 		= require "lib.ripple"
 moonshine 	= require "lib.moonshine"
 Gamestate 	= require "lib.gamestate"
 lume 		= require "lib.lume"
@@ -37,6 +38,7 @@ doDrawLight = true
 function love.load()
 	love.graphics.setDefaultFilter("nearest", "nearest")
 	loadSpritesheet()
+	Audio = loadAudio()
 
 	World = windfield.newWorld(0, 0, true)
 	World:addCollisionClass('Wall', {ignores = {'Wall'}})
@@ -62,11 +64,27 @@ function love.load()
 	Gamestate.switch(menu)
 
 	canvas = love.graphics.newCanvas(640, 360)
+
+	MusicsToPlay = lume.shuffle(Audio.Musics)
+
+	MusicPicked = love.math.random(1, #MusicsToPlay)
+	CurrentlyPlaying = MusicsToPlay[MusicPicked]:play()
 end
 
 function love.update(dt)
 	lurker.update()
 	Gamestate.update(dt)
+
+	if CurrentlyPlaying:isStopped() then
+		table.remove(MusicsToPlay, MusicPicked)
+
+		if #MusicsToPlay == 0 then
+			MusicsToPlay = lume.shuffle(Audio.Musics)
+		end
+
+		MusicPicked = love.math.random(1, #MusicsToPlay)
+		CurrentlyPlaying = MusicsToPlay[MusicPicked]:play()
+	end
 end
 
 function love.draw()
@@ -78,9 +96,9 @@ function love.draw()
 	love.graphics.draw(canvas, math.floor(love.graphics.getWidth()/2), math.floor(love.graphics.getHeight()/2), 0, renderScale, renderScale, math.floor(canvas:getWidth()/2), math.floor(canvas:getHeight()/2))
 
 	love.graphics.print("FPS:" .. love.timer.getFPS(), 10, 10)
-	love.graphics.print("Body Count: " .. World:getBodyCount( ), 10, 30)
+	--[[love.graphics.print("Body Count: " .. World:getBodyCount( ), 10, 30)
 	love.graphics.print("Render depth: " .. _ROOMDEPTH, 10, 50)
-	love.graphics.print(tostring(player.invicible), 10, 70)
+	love.graphics.print(tostring(player.invicible), 10, 70)]]
 end
 
 function love.resize()
@@ -208,4 +226,33 @@ function loadSpritesheet()
 
 	healthPotionImage = love.graphics.newQuad(18 * 16, 14 * 16, 16, 16, animationImage)
 	keyImage = love.graphics.newQuad(9 * 16, 9 * 16, 16, 16, tilemap)
+end
+
+function loadAudio()
+	local music = ripple.newTag()
+	local sfx = ripple.newTag()
+
+	local Audio = {}
+	Audio.Musics = {
+		ripple.newSound(love.audio.newSource("sfx/The Creature 1.ogg", "stream"), {tags = {music}}),
+		ripple.newSound(love.audio.newSource("sfx/The Creature 2.ogg", "stream"), {tags = {music}}),
+		ripple.newSound(love.audio.newSource("sfx/The Creature 3.ogg", "stream"), {tags = {music}}),
+		ripple.newSound(love.audio.newSource("sfx/The Creature 4.ogg", "stream"), {tags = {music}}),
+		ripple.newSound(love.audio.newSource("sfx/The Creature 5.ogg", "stream"), {tags = {music}})
+	}
+
+	Audio.Effects = {
+		swordSwing 			= ripple.newSound(love.audio.newSource("sfx/swing2.ogg", "static"), {tags = {sfx}}),
+		smallEnemyNotice 	= ripple.newSound(love.audio.newSource("sfx/smallEnemyNotice.ogg", "static"), {tags = {sfx}}),
+		smallEnemyHit		= ripple.newSound(love.audio.newSource("sfx/smallEnemyHit.ogg", "static"), {tags = {sfx}}),
+		sludgeEnemyNotice 	= ripple.newSound(love.audio.newSource("sfx/sludgeEnemyNotice.ogg", "static"), {tags = {sfx}}),
+		sludgeEnemyHit		= ripple.newSound(love.audio.newSource("sfx/sludgeEnemyHit.ogg", "static"), {tags = {sfx}}),
+		potionPickup		= ripple.newSound(love.audio.newSource("sfx/bottle.ogg", "static"), {tags = {sfx}}),
+		keyPickup			= ripple.newSound(love.audio.newSource("sfx/keyPickup.ogg", "static"), {tags = {sfx}}),
+	}
+
+	music.volume = .5
+	sfx.volume = .3
+
+	return Audio
 end
