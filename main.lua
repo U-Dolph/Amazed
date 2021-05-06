@@ -1,3 +1,4 @@
+bitser = require "lib/bitser"
 baton 		= require "lib.baton"
 ripple 		= require "lib.ripple"
 moonshine 	= require "lib.moonshine"
@@ -77,6 +78,7 @@ function love.load()
 	love.mouse.setCursor(cursor)
 
 	Highscores = {}
+	loadHighscores()
 end
 
 function love.update(dt)
@@ -261,4 +263,12 @@ function loadAudio()
 	sfx.volume = .3
 
 	return Audio
+end
+
+function loadHighscores()
+	if love.filesystem.getInfo("scores.dat") then
+		Highscores = bitser.loadLoveFile("scores.dat")
+	else
+		bitser.dumpLoveFile("scores.dat", Highscores)
+	end
 end

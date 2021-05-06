@@ -116,6 +116,7 @@ function gameover:leave()
     end)
 
     Highscores = lume.slice(Highscores, 1, 10)
+    bitser.dumpLoveFile("scores.dat", Highscores)
 end
 
 function gameover:resume()
