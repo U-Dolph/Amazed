@@ -28,6 +28,7 @@ require "inputContainer"
 require "gamestates.menu"
 require "gamestates.game"
 require "gamestates.gameover"
+require "gamestates.leaderboard"
 
 mazeWidth = 20
 mazeHeight = 20
