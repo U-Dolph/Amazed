@@ -1,3 +1,4 @@
+baton 		= require "lib.baton"
 ripple 		= require "lib.ripple"
 moonshine 	= require "lib.moonshine"
 Gamestate 	= require "lib.gamestate"
@@ -21,6 +22,7 @@ item 		= require "item"
 
 require "enemyFactory"
 require "popupHandler"
+require "inputContainer"
 
 --*GAMESTATES*--
 require "gamestates.menu"
@@ -69,11 +71,17 @@ function love.load()
 
 	MusicPicked = love.math.random(1, #MusicsToPlay)
 	CurrentlyPlaying = MusicsToPlay[MusicPicked]:play()
+
+	cursor = love.mouse.newCursor("gfx/cursor.png", 11, 11)
+	love.mouse.setCursor(cursor)
+
+	Highscores = {}
 end
 
 function love.update(dt)
 	lurker.update()
 	Gamestate.update(dt)
+	input:update()
 
 	if CurrentlyPlaying:isStopped() then
 		table.remove(MusicsToPlay, MusicPicked)
@@ -96,9 +104,6 @@ function love.draw()
 	love.graphics.draw(canvas, math.floor(love.graphics.getWidth()/2), math.floor(love.graphics.getHeight()/2), 0, renderScale, renderScale, math.floor(canvas:getWidth()/2), math.floor(canvas:getHeight()/2))
 
 	love.graphics.print("FPS:" .. love.timer.getFPS(), 10, 10)
-	--[[love.graphics.print("Body Count: " .. World:getBodyCount( ), 10, 30)
-	love.graphics.print("Render depth: " .. _ROOMDEPTH, 10, 50)
-	love.graphics.print(tostring(player.invicible), 10, 70)]]
 end
 
 function love.resize()
@@ -251,7 +256,7 @@ function loadAudio()
 		keyPickup			= ripple.newSound(love.audio.newSource("sfx/keyPickup.ogg", "static"), {tags = {sfx}}),
 	}
 
-	music.volume = .5
+	music.volume = 0.0
 	sfx.volume = .3
 
 	return Audio

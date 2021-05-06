@@ -88,13 +88,12 @@ function smallEnemy:new(_x, _y)
 			if self.attackHandler then self.timer:cancel(self.attackHandler) end
 
 			if self.state ~= "explosion" then
-				player.killCount = player.killCount + 1
 				self.state = "explosion"
 				if self.footCollider then self.footCollider:destroy() end
 				if self.bodyCollider then self.bodyCollider:destroy() end
 				self.footCollider = nil
 				self.bodyCollider = nil
-				self.timer:after(0.8, function() self.alive = false end)
+				self.timer:after(0.8, function() self.alive = false player.killCount = player.killCount + 1 end)
 			end
 		end
 	end

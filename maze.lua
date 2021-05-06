@@ -17,6 +17,8 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 	self.endNode, self.startNode, self.startIndex, self.endIndex = nil, nil, nil, nil
 	self.noiseOffsetX, self.noiseOffsetY = nil, nil
 
+	self.totalRooms = 0
+
 	function self:getIndex(_modX, _modY, _element)
 		if not _element then _element = self.stack[#self.stack] end
     	return (_element.y + _modY) * self.width + (_element.x + _modX) + 1
@@ -159,7 +161,6 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 
 		self:manageNodes()
 		self:solvePath()
-
 
 		for _, j in ipairs(self.rooms) do
 			if j.visited then

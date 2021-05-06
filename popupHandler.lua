@@ -1,9 +1,10 @@
 popupHandler = {}
 popupHandler.elements = {}
-popupHandler.font = love.graphics.newFont("ast/rainyhearts.ttf")
+--popupHandler.font = love.graphics.newFont("ast/rainyhearts.ttf")
+popupHandler.font = love.graphics.newFont("ast/pixelmix.ttf", 8)
 
 function popupHandler:addElement(text, x, y, colorTable, lifetime, motionModifier)
-    table.insert(self.elements, {displayText = text, x = x, y = y, color = colorTable, lifetime = lifetime or 0.5, motionModifier = motionModifier or 1})
+    table.insert(self.elements, {displayText = text, x = lume.round(x), y = lume.round(y), color = colorTable, lifetime = lifetime or 0.5, motionModifier = motionModifier or 1})
 end
 
 function popupHandler:update(dt)
