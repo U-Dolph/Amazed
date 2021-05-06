@@ -84,6 +84,20 @@ function item:new(_x, _y, _id)
 			Audio.Effects.keyPickup:play()
 
 			table.insert(player.inventory, self)
+
+			local keyCount = 0
+
+			for i, j in ipairs(player.inventory) do
+				if j.id == ITEM_TYPES.key then
+					keyCount = keyCount + 1
+				end
+			end
+
+			if keyCount == 3 then
+				game.objectives[1].completed = true
+			end
+
+			game.objectives[1].text = "Find all 3 keys (" .. keyCount .."/3)"
 		end
 
 		table.sort(player.inventory, function (a, b)

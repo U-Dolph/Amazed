@@ -83,10 +83,21 @@ function minimap:new(_x, _y, _w, _h)
 		love.graphics.draw(self.background, 152, 12, 0, 3, 3)
 		love.graphics.draw(self.frame, 152, 12, 0, 3, 3)
 
+		local roomNum = 0
+		local explored = 0
+
 		local roomSize = math.floor(300 / maze.width) - 1
 		local offsetX = math.floor((300 - roomSize * maze.width) / 2)
 
 		for _, j in ipairs(maze.rooms) do
+			if j.visited then
+				roomNum = roomNum + 1
+
+				if j.explored then explored = explored + 1 end
+
+				if j.node == maze.endNode and j.explored then game.objectives[2].completed = true end
+			end
+
 			if j.explored then
 				love.graphics.setColor(0, 0, 0, 0.3)
 				if j.node == maze.endNode then love.graphics.setColor(0.5, 0.5, 1, 0.3) end
@@ -126,6 +137,8 @@ function minimap:new(_x, _y, _w, _h)
 				love.graphics.rectangle("fill", 170 + offsetX + j.currentRoom.x * roomSize + roomSize/2, 30 + offsetX + j.currentRoom.y * roomSize + 1, 1, 1)
 			end
 		end
+
+		return roomNum, explored
 	end
 
 	return self

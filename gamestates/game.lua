@@ -1,16 +1,12 @@
 game = {}
 
 function game:init()
-    self.cursor = love.mouse.newCursor( "gfx/cursor.png", 11, 11)
-	love.mouse.setCursor(self.cursor)
-
     self.enemies = {}
     self.chests = {}
+    self.objectives = {}
 end
 
 function game:enter()
-	love.mouse.setCursor(self.cursor)
-
     --!KOREGA REQUIEM DA!--
     for _, j in ipairs(World:getBodies()) do j:destroy() end
 
@@ -23,15 +19,24 @@ function game:enter()
     self.enemies = {}
     self.chests = {}
 
+    self.totalEnemies = 0
+
+    self.objectives = {
+        {type = "main", text = "Find all 3 keys (0/3)", completed = false},
+        {type = "main", text = "Find the exit", completed = false},
+        {type = "optional", text = "Explore the whole map", completed = false, score = 10000},
+        {type = "optional", text = "Clear the whole map", completed = false, score = 15000}
+    }
+
     for _, j in ipairs(maze.rooms) do
-        if j.isNode and love.math.random() > 0.5 and j.node ~= maze.startNode then
+        if j.visited and love.math.random() > 0.5 and j.node ~= maze.startNode then
             spawnEnemies(j.renderX, j.renderY)
         end
     end
 
     for _, j in ipairs(maze.rooms) do
         local random = love.math.random()
-        if j.isNode and random > 0.9 and j.path[1] == 0 and j.node ~= maze.endNode then
+        if j.visited and random > 0.9 and j.path[1] == 0 and j.node ~= maze.endNode then
             table.insert(self.chests, Chest:new(j.renderX + 64, j.renderY + 16))
         end
     end
@@ -45,15 +50,13 @@ function game:enter()
     self.enterTime = os.clock()
 
     self.sessionTime = 0
-
-    self.totalEnemies = #self.enemies
 end
 
 function game:update(dt)
     World:update(dt)
 	player:update(dt)
 	maze:update(dt)
-	playerCam:setPosition(player.x, player.y)
+	playerCam:setPosition(lume.round(player.x), lume.round(player.y))
     self:updateEnemies(dt)
     self:updateChests(dt)
     popupHandler:update(dt)
@@ -88,33 +91,7 @@ function game:draw()
 end
 
 function game:keypressed(key)
-    if key == "space" then
-        player:dash()
-    end
 
-    if key == "e" then
-        for i, j in ipairs(self.chests) do
-            if lume.distance(j.x + 8, j.y, player.x, player.y) < 30 and not j.opened then
-                j:open()
-            end
-        end
-
-        if player.currentRoom.node == maze.endNode then
-            if lume.distance(player.currentRoom.renderX + maze.roomSize/2 * maze.tileSize, player.currentRoom.renderY, player.x, player.y) < 30 then
-                local gatheredKeys = 0
-
-                for i, j in ipairs(player.inventory) do
-                    if j.id == ITEM_TYPES.key then gatheredKeys = gatheredKeys + 1 end
-                end
-
-                if gatheredKeys >= 3 then
-                    Gamestate.switch(gameover, "success")
-                else
-                    popupHandler:addElement("Need " .. 3 - gatheredKeys .. " more " .. (3 - gatheredKeys == 1 and " key!" or " keys!"), player.currentRoom.renderX + maze.roomSize/2 * maze.tileSize, player.currentRoom.renderY + 8, {1, 0, 1})
-                end
-            end
-        end
-    end
 end
 
 function game:mousepressed(x, y, button)
@@ -124,7 +101,7 @@ function game:mousepressed(x, y, button)
 end
 
 function game:leave()
-    self.sessionTime = math.floor(os.clock() - self.enterTime) .. " s"
+    self.sessionTime = math.floor(os.clock() - self.enterTime)
 end
 
 function game:resume()
@@ -182,6 +159,7 @@ function spawnEnemies(xCoord, yCoord)
 
     table.insert(game.enemies, EnemyFactory.spawnEnemy(rolled, randomX, randomY))
     game.enemies[#game.enemies]:update(0)
+    game.totalEnemies = game.totalEnemies + 1
 end
 
 function placeKeys()

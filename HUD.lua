@@ -4,6 +4,7 @@ function HUD:new()
 	local self = {}
 
 	self.timer = Timer.new()
+	self.objectiveFont = love.graphics.newFont("ast/pixelmix.ttf", 8)
 
 	self.minimap = Minimap:new(518, 10, 100, 100)
 
@@ -34,7 +35,47 @@ function HUD:new()
 	end
 
 	function self:renderLarge()
-		self.minimap:renderLargeMap()
+		local totalRooms, exploredRooms = self.minimap:renderLargeMap()
+
+		love.graphics.setColor(1, 1, 1)
+		local renderY = 20
+
+		love.graphics.setFont(self.objectiveFont)
+		love.graphics.printf("- MAIN OBJECTIVES -", 5, 5, 140, "center")
+
+		for i, j in ipairs(game.objectives) do
+			if j.type == "main" then
+				love.graphics.print(j.text, 5, renderY)
+
+				if j.completed then
+					love.graphics.setColor(1, 0, 0)
+					love.graphics.line(3, renderY + 6, self.objectiveFont:getWidth(j.text) + 6, renderY + 6)
+					love.graphics.setColor(1, 1, 1)
+				end
+
+				renderY = renderY + 12
+			end
+		end
+
+		renderY = renderY + 7
+		love.graphics.printf("- OPTIONAL OBJECTIVES -", 5, renderY, 140, "center")
+		renderY = renderY + 15
+		for i, j in ipairs(game.objectives) do
+			if j.type == "optional" then
+				love.graphics.print(j.text, 5, renderY)
+
+				if j.completed then
+					love.graphics.setColor(1, 0, 0)
+					love.graphics.line(3, renderY + 6, self.objectiveFont:getWidth(j.text) + 6, renderY + 6)
+					love.graphics.setColor(1, 1, 1)
+				end
+
+				renderY = renderY + 12
+			end
+		end
+
+		if totalRooms == exploredRooms then game.objectives[3].completed = true end
+		if player.killCount >= game.totalEnemies then game.objectives[4].completed = true end
 	end
 
 	return self
