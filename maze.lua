@@ -268,7 +268,7 @@ function maze:new(_w, _h, _tileSize, _roomSize)
 	end
 
 	function self:render()
-		if Gamestate.current() == menu then
+		if Gamestate.current() ~= game then
 			for _, j in ipairs(self.rooms) do
 				local left, top, _, _, right, bottom = playerCam:getVisibleCorners()
 				if j.renderX + j.w >= left and j.renderX <= right and j.renderY + j.h >= top and j.renderY <= bottom then
