@@ -34,6 +34,8 @@ function gameover:init()
     self.timer = Timer.new()
     self.from = nil
     self.won = false
+
+    self.score = 0
 end
 
 function gameover:enter(from, ending)
@@ -70,23 +72,29 @@ function gameover:draw()
 
     love.graphics.print("Killed:", 220, 160)
     love.graphics.print(player.killCount .. "/" .. self.from.totalEnemies, 420, 160, 0, 1, 1, self.printFont:getWidth(player.killCount .. "/" .. self.from.totalEnemies))
-    love.graphics.print("(x100)", 425, 160)
 
     love.graphics.print("Damage dealt:", 220, 180)
     love.graphics.print(player.dealtDamage, 420, 180, 0, 1, 1, self.printFont:getWidth(player.dealtDamage))
-    love.graphics.print("(x5)", 425, 180)
 
     love.graphics.print("Damage received:", 220, 200)
     love.graphics.print(player.receivedDamage, 420, 200, 0, 1, 1, self.printFont:getWidth(player.receivedDamage))
-    love.graphics.print("(x-10)", 425, 200)
 
     love.graphics.print("Time:", 220, 220)
     love.graphics.print(game.sessionTime .. "s", 420, 220, 0, 1, 1, self.printFont:getWidth(game.sessionTime .. "s"))
-    love.graphics.print(math.max(0, 1000 - game.sessionTime) * (self.won and 1 or 0), 425, 220)
 
     love.graphics.print("Explored:", 220, 240)
-    love.graphics.print(self.exploredPercent, 420, 240, 0, 1, 1, self.printFont:getWidth(self.exploredPercent))
-    love.graphics.print("(x20)", 425, 240)
+    love.graphics.print(self.exploredPercent .. "%", 420, 240, 0, 1, 1, self.printFont:getWidth(self.exploredPercent .. "%"))
+
+    self.score = (player.killCount * 100 + self.exploredPercent * 100) * (self.won and 1 or 0.5) + (self.won and math.max(0, 1000 - game.sessionTime) or 0)
+
+    for i, j in ipairs(game.objectives) do
+        if j.completed then self.score = self.score + j.score end
+    end
+
+    love.graphics.line(220.5, 261.5, 419.5, 261.5)
+
+    love.graphics.print("Final score:", 220, 270)
+    love.graphics.print(self.score, 420, 270, 0, 1, 1, self.printFont:getWidth(self.score))
 
     love.graphics.print("ESC - Return to menu", 10, 360 - 20)
     love.graphics.print("Space - Start new game", 640 - 10 - self.printFont:getWidth("Space - Start new game"), 360 - 20)
@@ -101,7 +109,13 @@ function gameover:mousepressed(x, y, button)
 end
 
 function gameover:leave()
+    table.insert(Highscores, self.score)
 
+    table.sort(Highscores, function (a, b)
+        return a > b
+    end)
+
+    Highscores = lume.slice(Highscores, 1, 10)
 end
 
 function gameover:resume()
@@ -117,5 +131,5 @@ function getExploredPercentage()
         if j.explored then exploredRooms = exploredRooms + 1 end
     end
 
-    return lume.round(exploredRooms/totalRooms * 100) .. "%"
+    return lume.round(exploredRooms/totalRooms * 100)
 end

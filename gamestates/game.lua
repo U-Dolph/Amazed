@@ -22,8 +22,8 @@ function game:enter()
     self.totalEnemies = 0
 
     self.objectives = {
-        {type = "main", text = "Find all 3 keys (0/3)", completed = false},
-        {type = "main", text = "Find the exit", completed = false},
+        {type = "main", text = "Find all 3 keys (0/3)", completed = false, score = 0},
+        {type = "main", text = "Find the exit", completed = false, score = 0},
         {type = "optional", text = "Explore the whole map", completed = false, score = 10000},
         {type = "optional", text = "Clear the whole map", completed = false, score = 15000}
     }
