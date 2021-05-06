@@ -32,12 +32,29 @@ function menu:update(dt)
     local camX, camY = playerCam:getPosition()
     playerCam:setPosition(camX + (love.math.noise(math.cos(os.clock() / 10)) - 0.5) * 1, camY - (love.math.noise(os.clock() / 10) - 0.5) * 1)
 
+    local mx, my = love.mouse.getPosition()
+
     for i, j in ipairs(self.menuItems) do
+        if mx/renderScale > j.x - self.menufont:getWidth(j.displayText)/2 and mx/renderScale < j.x + self.menufont:getWidth(j.displayText)/2 and
+        my/renderScale > j.y - self.menufont:getHeight(j.displayText)/2 and my/renderScale < j.y + self.menufont:getHeight(j.displayText)/2 then
+            self.selected = i
+        end
+
         if i == self.selected then
             j.sizeModifier = math.min(1.25, j.sizeModifier + 5 * dt)
         else
             j.sizeModifier = math.max(1, j.sizeModifier - 5 * dt)
         end
+    end
+
+    if input:pressed("down") then
+        self.selected = math.min(#self.menuItems, self.selected + 1)
+    elseif input:pressed("up") then
+        self.selected = math.max(1, self.selected - 1)
+    elseif input:pressed("action") then
+        loadstring(self.menuItems[self.selected].command)()
+    elseif input:pressed("back") then
+        love.event.quit(0)
     end
 end
 
@@ -61,17 +78,19 @@ function menu:draw()
 end
 
 function menu:keypressed(key)
-    if key == 'w' then
-        self.selected = math.max(1, self.selected - 1)
-    elseif key == 's' then
-        self.selected = math.min(#self.menuItems, self.selected + 1)
-    end
 
-    if key == "space" then
-        loadstring(self.menuItems[self.selected].command)()
-    end
+end
 
-    if key == "escape" then love.event.quit() end
+function menu:mousepressed(x, y, button)
+    if button == 1 then
+        x = x/renderScale
+        y = y/renderScale
+
+        if x > self.menuItems[self.selected].x - self.menufont:getWidth(self.menuItems[self.selected].displayText)/2 and x < self.menuItems[self.selected].x + self.menufont:getWidth(self.menuItems[self.selected].displayText)/2 and
+        y > self.menuItems[self.selected].y - self.menufont:getHeight(self.menuItems[self.selected].displayText)/2 and y < self.menuItems[self.selected].y + self.menufont:getHeight(self.menuItems[self.selected].displayText)/2 then
+            loadstring(self.menuItems[self.selected].command)()
+        end
+    end
 end
 
 function menu:leave()

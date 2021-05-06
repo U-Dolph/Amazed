@@ -79,24 +79,50 @@ function player:new()
 		self:getCurrentRoom()
 
 		if self.state ~= "dashing" then
-			if love.keyboard.isDown("w") then
-				self.footCollider:applyForce(0, -self.moveSpeed)
-				self.state = "running"
-
-			elseif love.keyboard.isDown("s") then
+			if input:down("down") then
 				self.footCollider:applyForce(0, self.moveSpeed)
+				self.state = "running"
+			elseif input:down("up") then
+				self.footCollider:applyForce(0, -self.moveSpeed)
 				self.state = "running"
 			end
 
-			if love.keyboard.isDown("a") then
+			if input:down("left") then
 				self.footCollider:applyForce(-self.moveSpeed, 0)
 				self.state = "running"
 				self.direction = -1
-
-			elseif love.keyboard.isDown("d") then
+			elseif input:down("right") then
 				self.footCollider:applyForce(self.moveSpeed, 0)
 				self.state = "running"
 				self.direction = 1
+			end
+
+			if input:pressed("action") then
+				self:dash()
+			end
+		end
+
+		if input:pressed("interract") then
+			for i, j in ipairs(game.chests) do
+				if lume.distance(j.x + 8, j.y, self.x, self.y) < 30 and not j.opened then
+					j:open()
+				end
+			end
+
+			if self.currentRoom.node == maze.endNode then
+				if lume.distance(self.currentRoom.renderX + maze.roomSize/2 * maze.tileSize, self.currentRoom.renderY, self.x, self.y) < 30 then
+					local gatheredKeys = 0
+
+					for i, j in ipairs(self.inventory) do
+						if j.id == ITEM_TYPES.key then gatheredKeys = gatheredKeys + 1 end
+					end
+
+					if gatheredKeys >= 3 then
+						Gamestate.switch(gameover, "success")
+					else
+						popupHandler:addElement("Need " .. 3 - gatheredKeys .. " more " .. (3 - gatheredKeys == 1 and " key!" or " keys!"), self.currentRoom.renderX + maze.roomSize/2 * maze.tileSize, self.currentRoom.renderY + 8, {1, 0, 1})
+					end
+				end
 			end
 		end
 
