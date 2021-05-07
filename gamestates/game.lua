@@ -16,6 +16,7 @@ function game:enter(prevState)
     player = Player:new()
     player:setPosition(maze.startNode.renderX, maze.startNode.renderY)
     playerCam:setScale(1)
+    popupHandler:clear()
 
     self.enemies = {}
     self.chests = {}
