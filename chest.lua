@@ -70,6 +70,7 @@ function chest:new(_x, _y)
 	function self:open()
 		self.opened = true
 		self.image = chestImages[2]
+		Audio.Effects.chestOpen:play()
 
 		for i, j in ipairs(self.items) do
 			j:drop()

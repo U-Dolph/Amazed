@@ -1,4 +1,4 @@
-bitser = require "lib/bitser"
+bitser 		= require "lib.bitser"
 baton 		= require "lib.baton"
 ripple 		= require "lib.ripple"
 moonshine 	= require "lib.moonshine"
@@ -32,8 +32,8 @@ require "gamestates.gameover"
 require "gamestates.leaderboard"
 require "gamestates.settings"
 
-mazeWidth = 20
-mazeHeight = 20
+mazeWidth = 10
+mazeHeight = 10
 
 renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
 
@@ -70,11 +70,6 @@ function love.load()
 
 	canvas = love.graphics.newCanvas(640, 360)
 
-	MusicsToPlay = lume.shuffle(Audio.Musics)
-
-	MusicPicked = love.math.random(1, #MusicsToPlay)
-	CurrentlyPlaying = MusicsToPlay[MusicPicked]:play()
-
 	cursor = love.mouse.newCursor("gfx/cursor.png", 11, 11)
 	love.mouse.setCursor(cursor)
 
@@ -95,17 +90,6 @@ function love.update(dt)
 	lurker.update()
 	Gamestate.update(dt)
 	input:update()
-
-	if CurrentlyPlaying:isStopped() then
-		table.remove(MusicsToPlay, MusicPicked)
-
-		if #MusicsToPlay == 0 then
-			MusicsToPlay = lume.shuffle(Audio.Musics)
-		end
-
-		MusicPicked = love.math.random(1, #MusicsToPlay)
-		CurrentlyPlaying = MusicsToPlay[MusicPicked]:play()
-	end
 end
 
 function love.draw()
@@ -243,11 +227,19 @@ function loadAudio()
 
 	local Audio = {}
 	Audio.Musics = {
-		ripple.newSound(love.audio.newSource("sfx/The Creature 1.ogg", "stream"), {tags = {musicTag}}),
-		ripple.newSound(love.audio.newSource("sfx/The Creature 2.ogg", "stream"), {tags = {musicTag}}),
-		ripple.newSound(love.audio.newSource("sfx/The Creature 3.ogg", "stream"), {tags = {musicTag}}),
-		ripple.newSound(love.audio.newSource("sfx/The Creature 4.ogg", "stream"), {tags = {musicTag}}),
-		ripple.newSound(love.audio.newSource("sfx/The Creature 5.ogg", "stream"), {tags = {musicTag}})
+		ripple.newSound(love.audio.newSource("sfx/cursed-house.ogg", "stream"), {tags = {musicTag}}),
+		ripple.newSound(love.audio.newSource("sfx/graveyard.ogg", "stream"), {tags = {musicTag}}),
+		ripple.newSound(love.audio.newSource("sfx/New-Paradise.ogg", "stream"), {tags = {musicTag}}),
+		ripple.newSound(love.audio.newSource("sfx/sealed_room.ogg", "stream"), {tags = {musicTag}})
+	}
+
+	Audio.MenuMusics = {
+		ripple.newSound(love.audio.newSource("sfx/Ruined.ogg", "stream"), {tags = {musicTag}})
+	}
+
+	Audio.EndMusics = {
+		ripple.newSound(love.audio.newSource("sfx/jingle1.ogg", "stream"), {tags = {musicTag}}),
+		ripple.newSound(love.audio.newSource("sfx/GameOver_ME.ogg", "stream"), {tags = {musicTag}})
 	}
 
 	Audio.Effects = {
@@ -258,10 +250,8 @@ function loadAudio()
 		sludgeEnemyHit		= ripple.newSound(love.audio.newSource("sfx/sludgeEnemyHit.ogg", "static"), {tags = {sfxTag}}),
 		potionPickup		= ripple.newSound(love.audio.newSource("sfx/bottle.ogg", "static"), {tags = {sfxTag}}),
 		keyPickup			= ripple.newSound(love.audio.newSource("sfx/keyPickup.ogg", "static"), {tags = {sfxTag}}),
+		chestOpen			= ripple.newSound(love.audio.newSource("sfx/chestOpen.ogg", "static"), {tags = {sfxTag}}),
 	}
-
-	--music.volume = 0.0
-	--sfx.volume = .3
 
 	return Audio
 end
