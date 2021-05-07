@@ -6,7 +6,8 @@ function game:init()
     self.objectives = {}
 end
 
-function game:enter()
+function game:enter(prevState)
+    self.from = prevState
     --!KOREGA REQUIEM DA!--
     for _, j in ipairs(World:getBodies()) do j:destroy() end
 
@@ -48,8 +49,11 @@ function game:enter()
     end
 
     self.enterTime = os.clock()
-
     self.sessionTime = 0
+
+    self.musicsToPlay = lume.shuffle(Audio.Musics)
+    self.pickedMusic = love.math.random(1, #self.musicsToPlay)
+	self.currentlyPlaying = self.musicsToPlay[self.pickedMusic]:play({fadeDuration = 1})
 end
 
 function game:update(dt)
@@ -60,6 +64,22 @@ function game:update(dt)
     self:updateEnemies(dt)
     self:updateChests(dt)
     popupHandler:update(dt)
+
+    if self.from == gameover then gameover.currentMusic:update(dt)
+    elseif self.from == menu then Audio.MenuMusics[1]:update(dt) end
+
+    self.musicsToPlay[self.pickedMusic]:update(dt)
+
+    if self.currentlyPlaying:isStopped() then
+		table.remove(self.musicsToPlay, self.pickedMusic)
+
+		if #self.musicsToPlay == 0 then
+			self.musicsToPlay = lume.shuffle(Audio.Musics)
+		end
+
+		self.pickedMusic = love.math.random(1, #self.musicsToPlay)
+	    self.currentlyPlaying = self.musicsToPlay[self.pickedMusic]:play()
+	end
 
     preDrawLights()
 end
@@ -102,6 +122,7 @@ end
 
 function game:leave()
     self.sessionTime = math.floor(os.clock() - self.enterTime)
+    self.currentlyPlaying:stop(1)
 end
 
 function game:resume()

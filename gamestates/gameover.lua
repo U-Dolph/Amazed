@@ -36,25 +36,34 @@ function gameover:init()
     self.won = false
 
     self.score = 0
+    self.currentMusic = nil
 end
 
 function gameover:enter(from, ending)
+    self.from = from
+
     if ending == "failure" then
         self.currentText = self.failQuotes[love.math.random(1, #self.failQuotes)]
         self.textColor = {1, 0, 0}
         self.won = false
+        self.currentMusic = Audio.EndMusics[2]
+
     elseif ending == "success" then
         self.currentText = self.successQuotes[love.math.random(1, #self.successQuotes)]
         self.textColor = {0, 0.5, 1}
         self.won = true
+        self.currentMusic = Audio.EndMusics[1]
     end
 
-    self.from = from
-
     self.exploredPercent = getExploredPercentage()
+
+    self.currentMusic:play({fadeDuration = 1})
 end
 
 function gameover:update(dt)
+    game.musicsToPlay[game.pickedMusic]:update(dt)
+    self.currentMusic:update(dt)
+
     if input:pressed("back") then
         Gamestate.switch(menu)
     elseif input:pressed("action") then
@@ -117,6 +126,7 @@ function gameover:leave()
 
     Highscores = lume.slice(Highscores, 1, 10)
     bitser.dumpLoveFile("scores.dat", Highscores)
+    self.currentMusic:stop(1)
 end
 
 function gameover:resume()

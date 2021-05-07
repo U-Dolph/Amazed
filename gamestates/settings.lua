@@ -11,21 +11,6 @@ function settings:init()
         {text = "VSync:", value = SettingValues.VSync},
         {text = "Fullscreen:", value = SettingValues.Fullscreen},
     }
-end
-
-function settings:enter()
-    self.buttons = {
-        {text = "<", x = 280, y = 65, fn = changeVolume}
-    }
-end
-
-function settings:update(dt)
-    local camX, camY = playerCam:getPosition()
-    playerCam:setPosition(camX + (love.math.noise(math.cos(os.clock() / 10)) - 0.5) * 1, camY - (love.math.noise(os.clock() / 10) - 0.5) * 1)
-
-    if input:pressed("back") then
-        Gamestate.switch(menu)
-    end
 
     self.buttons = {
         {text = "<", x = 280, y = 65, fn = changeVolume, params = {1, -0.1}},
@@ -42,6 +27,18 @@ function settings:update(dt)
         {x = 300, y = 155, w = 16, fn = changeToggle, params = {4, nil}},
         {x = 300, y = 185, w = 16, fn = changeToggle, params = {5, nil}}
     }
+end
+
+function settings:enter()
+end
+
+function settings:update(dt)
+    local camX, camY = playerCam:getPosition()
+    playerCam:setPosition(camX + (love.math.noise(math.cos(os.clock() / 10)) - 0.5) * 1, camY - (love.math.noise(os.clock() / 10) - 0.5) * 1)
+
+    if input:pressed("back") then
+        Gamestate.pop()
+    end
 end
 
 function settings:draw()

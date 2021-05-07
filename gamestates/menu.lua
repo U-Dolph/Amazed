@@ -16,21 +16,27 @@ function menu:init()
 
     self.menuItems = {
         {displayText = "START", x = 320, y = 180, sizeModifier = 1.5, command = "Gamestate.switch(game)"},
-        {displayText = "SETTINGS", x = 320, y = 220, sizeModifier = 1, command = "Gamestate.switch(settings)"},
-        {displayText = "LEADERBOARD", x = 320, y = 260, sizeModifier = 1, command = "Gamestate.switch(leaderboard)"},
+        {displayText = "SETTINGS", x = 320, y = 220, sizeModifier = 1, command = "Gamestate.push(settings)"},
+        {displayText = "LEADERBOARD", x = 320, y = 260, sizeModifier = 1, command = "Gamestate.push(leaderboard)"},
         {displayText = "QUIT", x = 320, y = 300, sizeModifier = 1, command = "love.event.quit(0)"}
     }
 
     self.selected = 1
 end
 
-function menu:enter(previousState)
-
+function menu:enter(prevState)
+    Audio.MenuMusics[1]:play({loop = true, fadeDuration = 1})
+    self.from = prevState
 end
 
 function menu:update(dt)
     local camX, camY = playerCam:getPosition()
     playerCam:setPosition(camX + (love.math.noise(math.cos(os.clock() / 10)) - 0.5) * 1, camY - (love.math.noise(os.clock() / 10) - 0.5) * 1)
+    Audio.MenuMusics[1]:update(dt)
+
+    if self.from == gameover then
+        gameover.currentMusic:update(dt)
+    end
 
     local mx, my = love.mouse.getPosition()
 
@@ -94,7 +100,7 @@ function menu:mousepressed(x, y, button)
 end
 
 function menu:leave()
-
+    Audio.MenuMusics[1]:stop(1)
 end
 
 function menu:resume()

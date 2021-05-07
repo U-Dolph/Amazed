@@ -14,7 +14,7 @@ function leaderboard:update(dt)
     playerCam:setPosition(camX + (love.math.noise(math.cos(os.clock() / 10)) - 0.5) * 1, camY - (love.math.noise(os.clock() / 10) - 0.5) * 1)
 
     if input:pressed("back") then
-        Gamestate.switch(menu)
+        Gamestate.pop()
     end
 end
 
