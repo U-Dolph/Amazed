@@ -16,7 +16,7 @@ function menu:init()
 
     self.menuItems = {
         {displayText = "START", x = 320, y = 180, sizeModifier = 1.5, command = "Gamestate.switch(game)"},
-        {displayText = "SETTINGS", x = 320, y = 220, sizeModifier = 1, command = "print('settings')"},
+        {displayText = "SETTINGS", x = 320, y = 220, sizeModifier = 1, command = "Gamestate.switch(settings)"},
         {displayText = "LEADERBOARD", x = 320, y = 260, sizeModifier = 1, command = "Gamestate.switch(leaderboard)"},
         {displayText = "QUIT", x = 320, y = 300, sizeModifier = 1, command = "love.event.quit(0)"}
     }

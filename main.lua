@@ -30,6 +30,7 @@ require "gamestates.menu"
 require "gamestates.game"
 require "gamestates.gameover"
 require "gamestates.leaderboard"
+require "gamestates.settings"
 
 mazeWidth = 20
 mazeHeight = 20
@@ -79,6 +80,15 @@ function love.load()
 
 	Highscores = {}
 	loadHighscores()
+
+	SettingValues = {
+		MasterVolume 	= 1.0,
+		MusicVolume		= 0.5,
+		EffectVolume	= 0.3,
+		VSync			= true,
+		Fullscreen		= false,
+	}
+	loadSettings()
 end
 
 function love.update(dt)
@@ -122,10 +132,6 @@ function love.keypressed(key)
 		love.event.quit("restart")
 	end
 
-	if key == "f1" then
-		love.load()
-	end
-
 	if key == "f" then
 		love.window.setFullscreen(not love.window.getFullscreen())
 		renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
@@ -141,6 +147,11 @@ function love.keypressed(key)
 
 	if key == "f2" then
 		doDrawColliders = not doDrawColliders
+	end
+
+	if key == "left" then
+		SettingValues.MasterVolume = SettingValues.MasterVolume - 0.1
+		print(SettingValues.MasterVolume)
 	end
 
 	--*FOR DEBUG ONLY*--
@@ -237,30 +248,30 @@ function loadSpritesheet()
 end
 
 function loadAudio()
-	local music = ripple.newTag()
-	local sfx = ripple.newTag()
+	musicTag = ripple.newTag()
+	sfxTag = ripple.newTag()
 
 	local Audio = {}
 	Audio.Musics = {
-		ripple.newSound(love.audio.newSource("sfx/The Creature 1.ogg", "stream"), {tags = {music}}),
-		ripple.newSound(love.audio.newSource("sfx/The Creature 2.ogg", "stream"), {tags = {music}}),
-		ripple.newSound(love.audio.newSource("sfx/The Creature 3.ogg", "stream"), {tags = {music}}),
-		ripple.newSound(love.audio.newSource("sfx/The Creature 4.ogg", "stream"), {tags = {music}}),
-		ripple.newSound(love.audio.newSource("sfx/The Creature 5.ogg", "stream"), {tags = {music}})
+		ripple.newSound(love.audio.newSource("sfx/The Creature 1.ogg", "stream"), {tags = {musicTag}}),
+		ripple.newSound(love.audio.newSource("sfx/The Creature 2.ogg", "stream"), {tags = {musicTag}}),
+		ripple.newSound(love.audio.newSource("sfx/The Creature 3.ogg", "stream"), {tags = {musicTag}}),
+		ripple.newSound(love.audio.newSource("sfx/The Creature 4.ogg", "stream"), {tags = {musicTag}}),
+		ripple.newSound(love.audio.newSource("sfx/The Creature 5.ogg", "stream"), {tags = {musicTag}})
 	}
 
 	Audio.Effects = {
-		swordSwing 			= ripple.newSound(love.audio.newSource("sfx/swing2.ogg", "static"), {tags = {sfx}}),
-		smallEnemyNotice 	= ripple.newSound(love.audio.newSource("sfx/smallEnemyNotice.ogg", "static"), {tags = {sfx}}),
-		smallEnemyHit		= ripple.newSound(love.audio.newSource("sfx/smallEnemyHit.ogg", "static"), {tags = {sfx}}),
-		sludgeEnemyNotice 	= ripple.newSound(love.audio.newSource("sfx/sludgeEnemyNotice.ogg", "static"), {tags = {sfx}}),
-		sludgeEnemyHit		= ripple.newSound(love.audio.newSource("sfx/sludgeEnemyHit.ogg", "static"), {tags = {sfx}}),
-		potionPickup		= ripple.newSound(love.audio.newSource("sfx/bottle.ogg", "static"), {tags = {sfx}}),
-		keyPickup			= ripple.newSound(love.audio.newSource("sfx/keyPickup.ogg", "static"), {tags = {sfx}}),
+		swordSwing 			= ripple.newSound(love.audio.newSource("sfx/swing2.ogg", "static"), {tags = {sfxTag}}),
+		smallEnemyNotice 	= ripple.newSound(love.audio.newSource("sfx/smallEnemyNotice.ogg", "static"), {tags = {sfxTag}}),
+		smallEnemyHit		= ripple.newSound(love.audio.newSource("sfx/smallEnemyHit.ogg", "static"), {tags = {sfxTag}}),
+		sludgeEnemyNotice 	= ripple.newSound(love.audio.newSource("sfx/sludgeEnemyNotice.ogg", "static"), {tags = {sfxTag}}),
+		sludgeEnemyHit		= ripple.newSound(love.audio.newSource("sfx/sludgeEnemyHit.ogg", "static"), {tags = {sfxTag}}),
+		potionPickup		= ripple.newSound(love.audio.newSource("sfx/bottle.ogg", "static"), {tags = {sfxTag}}),
+		keyPickup			= ripple.newSound(love.audio.newSource("sfx/keyPickup.ogg", "static"), {tags = {sfxTag}}),
 	}
 
-	music.volume = 0.0
-	sfx.volume = .3
+	--music.volume = 0.0
+	--sfx.volume = .3
 
 	return Audio
 end
@@ -271,4 +282,19 @@ function loadHighscores()
 	else
 		bitser.dumpLoveFile("scores.dat", Highscores)
 	end
+end
+
+function loadSettings()
+	if love.filesystem.getInfo("settings.dat") then
+		SettingValues = bitser.loadLoveFile("settings.dat")
+	else
+		bitser.dumpLoveFile("settings.dat", SettingValues)
+	end
+
+	musicTag.volume = SettingValues.MusicVolume * SettingValues.MasterVolume
+    sfxTag.volume = SettingValues.EffectVolume * SettingValues.MasterVolume
+
+    love.window.setFullscreen(SettingValues.Fullscreen)
+    love.window.setVSync(SettingValues.VSync)
+	renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
 end
