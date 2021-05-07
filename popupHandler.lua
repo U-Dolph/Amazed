@@ -24,3 +24,7 @@ function popupHandler:render()
         love.graphics.printf({j.color, j.displayText}, x, y, 64, "center")
     end
 end
+
+function popupHandler:clear()
+    popupHandler.elements = {}
+end
