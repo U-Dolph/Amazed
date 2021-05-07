@@ -132,13 +132,8 @@ function love.keypressed(key)
 		love.event.quit("restart")
 	end
 
-	if key == "f" then
-		love.window.setFullscreen(not love.window.getFullscreen())
-		renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
-	end
-
-	if key == "v" then
-		love.window.setVSync(love.window.getVSync() == 0 and 1 or 0)
+	if key == "f1" and Gamestate.current() == game then
+		Gamestate.switch(game)
 	end
 
 	if key == "l" then
@@ -147,11 +142,6 @@ function love.keypressed(key)
 
 	if key == "f2" then
 		doDrawColliders = not doDrawColliders
-	end
-
-	if key == "left" then
-		SettingValues.MasterVolume = SettingValues.MasterVolume - 0.1
-		print(SettingValues.MasterVolume)
 	end
 
 	--*FOR DEBUG ONLY*--
