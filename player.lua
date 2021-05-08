@@ -229,6 +229,8 @@ function player:new()
 			self.health = self.health - damage
 			self.invicible = true
 
+			Audio.Effects.playerHit:play()
+
 			self.timer:after(0.3, function ()
 				self.invicible = false
 			end)
