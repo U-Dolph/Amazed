@@ -1,6 +1,7 @@
 ENEMY_TYPES = {
-    SmallEnemy = {ID = 1, weight = 10},
-    SludgeEnemy = {ID = 2, weight = 20}
+    SmallEnemy = {ID = 1, weight = 0},
+    SludgeEnemy = {ID = 2, weight = 0},
+    PyroEnemy = {ID = 3, weight = 1},
 }
 
 EnemyFactory = {}
@@ -10,5 +11,7 @@ function EnemyFactory.spawnEnemy(enemyType, xCoord, yCoord)
         return SmallEnemy:new(xCoord, yCoord)
     elseif enemyType == ENEMY_TYPES.SludgeEnemy then
         return SludgeEnemy:new(xCoord, yCoord)
+    elseif enemyType == ENEMY_TYPES.PyroEnemy then
+        return PyroEnemy:new(xCoord, yCoord)
     end
 end

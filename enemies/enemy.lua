@@ -8,6 +8,9 @@ function enemy:new(_x, _y)
 	self.direction = love.math.random(0, 1) == 0 and -1 or 1
 	self.state = "idle"
 
+	self.verticalAnimOffset = 0
+	self.horizontalAnimOffset = 0
+
 	self.currentRoom = nil
 	self.destinationNode = nil
 
@@ -41,7 +44,7 @@ function enemy:new(_x, _y)
 		if self.state == "explosion" then
 			self.animations[self.state]:draw(smallExplosionImage, self.x, self.y, 0, 1, 1, 8, 8)
 		else
-			self.animations[self.state]:draw(animationImage, self.x, self.y, 0, self.direction, 1, 9, 8)
+			self.animations[self.state]:draw(animationImage, self.x, self.y, 0, self.direction, 1, 9 + self.horizontalAnimOffset, 8 + self.verticalAnimOffset)
 		end
 
 		love.graphics.setColor(0, 1, 0)
@@ -129,7 +132,10 @@ function enemy:new(_x, _y)
 		if not self.invicible and self.health > 0 then
 			local damage = math.max(1, (value - self.defense) + love.math.random(-4, 4))
 			popupHandler:addElement(damage, self.x - 32, self.y - 18, {1, 0, 0})
-			if self.hitSound then self.hitSound:play() end
+
+			if damage < self.health then self.hitSound:play()
+			else self.deathSound:play() end
+
 			self.invicible = true
 			self.health = self.health - damage
 
