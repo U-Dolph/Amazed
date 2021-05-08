@@ -20,6 +20,7 @@ function smallEnemy:new(_x, _y)
 
 	self.noticeSound = Audio.Effects.smallEnemyNotice
 	self.hitSound = Audio.Effects.smallEnemyHit
+	self.deathSound = Audio.Effects.smallEnemyDeath
 
 	function self:update(dt)
 		self.timer:update(dt)

@@ -20,6 +20,7 @@ function sludgeEnemy:new(_x, _y)
 
 	self.noticeSound = Audio.Effects.sludgeEnemyNotice
 	self.hitSound = Audio.Effects.sludgeEnemyHit
+	self.deathSound = Audio.Effects.sludgeEnemyDeath
 
 	function self:update(dt)
 		self.timer:update(dt)
@@ -84,7 +85,6 @@ function sludgeEnemy:new(_x, _y)
 
 				self.path = {}
 			end
-
 		elseif self.health <= 0 then
 			if self.attackHandler then self.timer:cancel(self.attackHandler) end
 
