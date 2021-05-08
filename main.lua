@@ -18,6 +18,7 @@ HUD 		= require "HUD"
 Enemy 		= require "enemies.enemy"
 SmallEnemy 	= require "enemies.smallEnemy"
 SludgeEnemy = require "enemies.sludgeEnemy"
+PyroEnemy 	= require "enemies.pyroEnemy"
 Chest 		= require "chest"
 item 		= require "item"
 
@@ -32,8 +33,8 @@ require "gamestates.gameover"
 require "gamestates.leaderboard"
 require "gamestates.settings"
 
-mazeWidth = 10
-mazeHeight = 10
+mazeWidth = 20
+mazeHeight = 20
 
 renderScale = math.min(love.graphics.getWidth() / 640, love.graphics.getHeight() / 360)
 
@@ -77,8 +78,8 @@ function love.load()
 	loadHighscores()
 
 	SettingValues = {
-		MasterVolume 	= 1.0,
-		MusicVolume		= 0.5,
+		MasterVolume 	= 0.5,
+		MusicVolume		= 0.3,
 		EffectVolume	= 0.3,
 		VSync			= true,
 		Fullscreen		= false,
@@ -244,13 +245,21 @@ function loadAudio()
 
 	Audio.Effects = {
 		swordSwing 			= ripple.newSound(love.audio.newSource("sfx/swing2.ogg", "static"), {tags = {sfxTag}}),
+
 		smallEnemyNotice 	= ripple.newSound(love.audio.newSource("sfx/smallEnemyNotice.ogg", "static"), {tags = {sfxTag}}),
 		smallEnemyHit		= ripple.newSound(love.audio.newSource("sfx/smallEnemyHit.ogg", "static"), {tags = {sfxTag}}),
+		smallEnemyDeath		= ripple.newSound(love.audio.newSource("sfx/smallEnemyDeath.ogg", "static"), {tags = {sfxTag}}),
+
 		sludgeEnemyNotice 	= ripple.newSound(love.audio.newSource("sfx/sludgeEnemyNotice.ogg", "static"), {tags = {sfxTag}}),
 		sludgeEnemyHit		= ripple.newSound(love.audio.newSource("sfx/sludgeEnemyHit.ogg", "static"), {tags = {sfxTag}}),
+		sludgeEnemyDeath	= ripple.newSound(love.audio.newSource("sfx/sludgeEnemyDeath.ogg", "static"), {tags = {sfxTag}}),
+
 		potionPickup		= ripple.newSound(love.audio.newSource("sfx/bottle.ogg", "static"), {tags = {sfxTag}}),
 		keyPickup			= ripple.newSound(love.audio.newSource("sfx/keyPickup.ogg", "static"), {tags = {sfxTag}}),
 		chestOpen			= ripple.newSound(love.audio.newSource("sfx/chestOpen.ogg", "static"), {tags = {sfxTag}}),
+
+		pyroEnemyClick		= ripple.newSound(love.audio.newSource("sfx/bombClick.ogg", "static"), {tags = {sfxTag}}),
+		pyroEnemyBlast		= ripple.newSound(love.audio.newSource("sfx/explosion.ogg", "static"), {tags = {sfxTag}}),
 	}
 
 	return Audio
