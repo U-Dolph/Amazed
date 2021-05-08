@@ -109,9 +109,9 @@ function pyroEnemy:new(_x, _y)
 			self.state = "attacking"
             self.horizontalAnimOffset = 24 - 9
             self.invicible = true
-            Audio.Effects.psychoEnemyClick:play()
+            Audio.Effects.pyroEnemyClick:play()
             self.timer:after(0.3, function ()
-                Audio.Effects.psychoEnemyBlast:play()
+                Audio.Effects.pyroEnemyBlast:play()
             end)
 
 			self.timer:after(8 * 0.05, 	function ()
