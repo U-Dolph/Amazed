@@ -32,6 +32,7 @@ require "gamestates.game"
 require "gamestates.gameover"
 require "gamestates.leaderboard"
 require "gamestates.settings"
+require "gamestates.intro"
 
 mazeWidth = 20
 mazeHeight = 20
@@ -66,9 +67,6 @@ function love.load()
 	player = Player:new()
 	hud = HUD:new()
 
-	Gamestate.registerEvents{'keypressed', 'mousepressed'}
-	Gamestate.switch(menu)
-
 	canvas = love.graphics.newCanvas(640, 360)
 
 	cursor = love.mouse.newCursor("gfx/cursor.png", 11, 11)
@@ -85,6 +83,9 @@ function love.load()
 		Fullscreen		= false,
 	}
 	loadSettings()
+
+	Gamestate.registerEvents{'keypressed', 'mousepressed'}
+	Gamestate.switch(intro)
 end
 
 function love.update(dt)
@@ -245,6 +246,7 @@ function loadAudio()
 
 	Audio.Effects = {
 		swordSwing 			= ripple.newSound(love.audio.newSource("sfx/swing2.ogg", "static"), {tags = {sfxTag}}),
+		playerHit 			= ripple.newSound(love.audio.newSource("sfx/playerHit.ogg", "static"), {tags = {sfxTag}}),
 
 		smallEnemyNotice 	= ripple.newSound(love.audio.newSource("sfx/smallEnemyNotice.ogg", "static"), {tags = {sfxTag}}),
 		smallEnemyHit		= ripple.newSound(love.audio.newSource("sfx/smallEnemyHit.ogg", "static"), {tags = {sfxTag}}),
