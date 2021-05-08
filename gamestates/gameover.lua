@@ -126,6 +126,7 @@ function gameover:leave()
 
     Highscores = lume.slice(Highscores, 1, 10)
     bitser.dumpLoveFile("scores.dat", Highscores)
+    game.musicsToPlay[game.pickedMusic]:stop()
     self.currentMusic:stop(1)
 end
 

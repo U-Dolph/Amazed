@@ -52,6 +52,10 @@ function game:enter(prevState)
     self.enterTime = os.clock()
     self.sessionTime = 0
 
+    if self.currentlyPlaying then
+        self.currentlyPlaying:stop()
+    end
+
     self.musicsToPlay = lume.shuffle(Audio.Musics)
     self.pickedMusic = love.math.random(1, #self.musicsToPlay)
 	self.currentlyPlaying = self.musicsToPlay[self.pickedMusic]:play({fadeDuration = 1})
