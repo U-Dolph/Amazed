@@ -60,6 +60,13 @@ function pyroEnemy:new(_x, _y)
 						if self.canAttack then self:attack() end
 					end
 				end
+
+				if self.bodyCollider:enter('PlayerFoot') then
+					if player.state == "dashing" then self:takeDamage(player.power) end
+					if not self.isAttacking then
+						self:noticePlayer()
+					end
+				end
 			else
 				if self.footCollider then
 					self.footCollider:destroy()
