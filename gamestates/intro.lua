@@ -6,6 +6,7 @@ end
 
 function intro:enter()
     self.video:play()
+    love.mouse.setVisible(false)
 end
 
 function intro:update(dt)
@@ -20,4 +21,5 @@ end
 
 function intro:leave()
     love.graphics.setDefaultFilter("nearest", "nearest")
+    love.mouse.setVisible(true)
 end
