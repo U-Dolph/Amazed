@@ -1,6 +1,6 @@
 ENEMY_TYPES = {
-    SmallEnemy = {ID = 1, weight = 0},
-    SludgeEnemy = {ID = 2, weight = 0},
+    SmallEnemy = {ID = 1, weight = 6},
+    SludgeEnemy = {ID = 2, weight = 3},
     PyroEnemy = {ID = 3, weight = 1},
 }
 
