@@ -13,7 +13,7 @@ function love.conf(t)
 	t.window.vsync = 1
 	t.window.msaa = 0
 
-	t.console = true
+	t.console = false
 
 	t.window.resizable = true
 end
